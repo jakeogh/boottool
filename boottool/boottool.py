@@ -372,7 +372,7 @@ def install_grub(ctx,
                        verbose=verbose,
                        debug=debug,)
     partuuid_root_device_command = sh.Command('/home/cfg/linux/disk/blkid/PARTUUID_root_device')
-    partuuid_root_device = partuuid_root_device_command()
+    partuuid_root_device = partuuid_root_device_command().strip()
 
     partuuid_root_device_fstab_line = 'PARTUUID=' + str(partuuid_root_device) + '\t/' + '\text4' + '\tnoatime' + '\t0'+ '\t1'
     write_line_to_file(path=Path('/etc/fstab'),
