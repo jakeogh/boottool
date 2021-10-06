@@ -47,7 +47,6 @@ from blocktool import get_block_device_size
 from blocktool import path_is_block_special
 from blocktool import warn
 from compile_kernel.compile_kernel import kcompile
-from devicetool import create_filesystem
 from devicetool import destroy_block_device_head_and_tail
 from devicetool import device_is_not_a_partition
 from devicetool import path_is_block_special
