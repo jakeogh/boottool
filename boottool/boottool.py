@@ -54,6 +54,7 @@ from blocktool import device_is_not_a_partition
 from blocktool import path_is_block_special
 from blocktool import warn
 from compile_kernel.compile_kernel import kcompile
+from devicetool import get_partuuid_for_partition
 from devicetool import write_efi_partition
 from devicetool import write_gpt
 from devicetool import write_grub_bios_partition
@@ -360,9 +361,10 @@ def install_grub(ctx,
     ic(root_partition)
     assert root_partition.startswith('/dev/')
     ic(root_partition)
-    partition_uuid_command = sh.Command('/home/cfg/linux/hardware/disk/blkid/PARTUUID')
-    partuuid = partition_uuid_command(root_partition, _err=sys.stderr, _out=sys.stdout)
-    ic("GRUB_DEVICE partuuid: {partuuid}".format(partuuid=partuuid))
+    #partition_uuid_command = sh.Command('/home/cfg/linux/hardware/disk/blkid/PARTUUID')
+    #partuuid = partition_uuid_command(root_partition, _err=sys.stderr, _out=sys.stdout)
+    partuuid = get_partuuid_for_partition(root_partition, verbose=verbose, debug=debug)
+    ic('GRUB_DEVICE partuuid:', partuuid)
 
     write_line_to_file(path=Path('/etc/default/grub'),
                        line='GRUB_DEVICE="PARTUUID={partuuid}"'.format(partuuid=partuuid) + '\n',
