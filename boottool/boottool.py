@@ -216,6 +216,26 @@ def write_boot_partition(*,
 
 
 @cli.command()
+@click.argument("boot_device")
+@click.option('--verbose', is_flag=True)
+@click.option('--debug', is_flag=True)
+def make_hybrid_mbr(*,
+                    boot_device: str,
+                    verbose: bool,
+                    debug: bool,
+                    ):
+
+    if not root_user():
+        ic('You must be root.')
+        sys.exit(1)
+
+    assert path_is_block_special(boot_device)
+
+    make_hybrid_mbr_command = sh.Command('/home/cfg/_myapps/sendgentoo/sendgentoo/gpart_make_hybrid_mbr.sh')
+    make_hybrid_mbr_command(boot_device, _out=sys.stdout, _err=sys.stderr)
+
+
+@cli.command()
 @click.option('--boot-device',                 is_flag=False, required=True)
 @click.option('--boot-device-partition-table', is_flag=False, required=False, type=click.Choice(['gpt']), default="gpt")
 @click.option('--boot-filesystem',             is_flag=False, required=False, type=click.Choice(['ext4']), default="ext4")
