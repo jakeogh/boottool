@@ -397,8 +397,9 @@ def install_grub(ctx,
                        verbose=verbose,
                        debug=debug,)
 
-    root_partition_command = sh.Command('/home/cfg/linux/disk/get_root_device')
-    root_partition = root_partition_command()
+    #root_partition_command = sh.Command('/home/cfg/linux/disk/get_root_device')
+    root_partition = sh.grub_probe('--target=device', '/')
+    #root_partition = root_partition_command()
     ic(root_partition)
     assert root_partition.startswith('/dev/')
     ic("-------------- root_partition: {root_partition} ---------------------".format(root_partition=root_partition))
