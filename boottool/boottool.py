@@ -24,7 +24,6 @@
 
 import os
 import sys
-import time
 from signal import SIG_DFL
 from signal import SIGPIPE
 from signal import signal
@@ -34,9 +33,6 @@ import sh
 
 signal(SIGPIPE, SIG_DFL)
 from pathlib import Path
-from signal import SIG_DFL
-from signal import SIGPIPE
-from signal import signal
 from typing import ByteString
 from typing import Generator
 from typing import Iterable
@@ -47,63 +43,25 @@ from typing import Sequence
 from typing import Tuple
 from typing import Union
 
-import click
-import humanfriendly
-import sh
-#from with_sshfs import sshfs
-#from with_chdir import chdir
 from asserttool import eprint
 from asserttool import ic
 from asserttool import nevd
 from asserttool import root_user
-from asserttool import validate_slice
-from asserttool import verify
 from blocktool import add_partition_number_to_device
 from blocktool import create_filesystem
 from blocktool import destroy_block_device_head_and_tail
-from blocktool import destroy_block_devices_head_and_tail
 from blocktool import device_is_not_a_partition
-from blocktool import get_block_device_size
 from blocktool import path_is_block_special
 from blocktool import warn
 from compile_kernel.compile_kernel import kcompile
-from devicetool import destroy_block_device_head_and_tail
-from devicetool import device_is_not_a_partition
-from devicetool import path_is_block_special
 from devicetool import write_efi_partition
 from devicetool import write_gpt
 from devicetool import write_grub_bios_partition
-from enumerate_input import enumerate_input
 from mounttool import block_special_path_is_mounted
 from mounttool import path_is_mounted
-#from asserttool import not_root
-#from pathtool import path_is_block_special
 from pathtool import write_line_to_file
 from portagetool import install_package
-from psutil import virtual_memory
-from retry_on_exception import retry_on_exception
 from timetool import get_timestamp
-
-signal(SIGPIPE, SIG_DFL)
-from pathlib import Path
-from typing import ByteString
-from typing import Generator
-from typing import Iterable
-from typing import List
-from typing import Optional
-from typing import Sequence
-from typing import Tuple
-from typing import Union
-
-#from with_sshfs import sshfs
-#from with_chdir import chdir
-from asserttool import eprint
-from asserttool import ic
-from asserttool import nevd
-from asserttool import validate_slice
-from asserttool import verify
-from enumerate_input import enumerate_input
-from retry_on_exception import retry_on_exception
 
 
 def create_boot_device(ctx, *,
@@ -209,6 +167,7 @@ def cli(ctx,
                                      ipython=False,
                                      verbose=verbose,
                                      debug=debug,)
+
 
 @cli.command()
 @click.option('--device', is_flag=False, required=True)
@@ -397,12 +356,10 @@ def install_grub(ctx,
                        verbose=verbose,
                        debug=debug,)
 
-    #root_partition_command = sh.Command('/home/cfg/linux/disk/get_root_device')
     root_partition = sh.grub_probe('--target=device', '/')
-    #root_partition = root_partition_command()
     ic(root_partition)
     assert root_partition.startswith('/dev/')
-    ic("-------------- root_partition: {root_partition} ---------------------".format(root_partition=root_partition))
+    ic(root_partition)
     partition_uuid_command = sh.Command('/home/cfg/linux/hardware/disk/blkid/PARTUUID')
     partuuid = partition_uuid_command(root_partition, _err=sys.stderr, _out=sys.stdout)
     ic("GRUB_DEVICE partuuid: {partuuid}".format(partuuid=partuuid))
