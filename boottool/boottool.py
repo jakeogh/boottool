@@ -33,9 +33,6 @@ import click
 import sh
 
 signal(SIGPIPE, SIG_DFL)
-import os
-import sys
-import time
 from pathlib import Path
 from signal import SIG_DFL
 from signal import SIGPIPE
