@@ -399,9 +399,11 @@ def install_grub(ctx,
 
     root_partition_command = sh.Command('/home/cfg/linux/disk/get_root_device')
     root_partition = root_partition_command()
+    ic(root_partition)
+    assert root_partition.startswith('/dev/')
     ic("-------------- root_partition: {root_partition} ---------------------".format(root_partition=root_partition))
     partition_uuid_command = sh.Command('/home/cfg/linux/hardware/disk/blkid/PARTUUID')
-    partuuid = partition_uuid_command(root_partition)
+    partuuid = partition_uuid_command(root_partition, _err=sys.stderr, _out=sys.stdout)
     ic("GRUB_DEVICE partuuid: {partuuid}".format(partuuid=partuuid))
 
     write_line_to_file(path=Path('/etc/default/grub'),
