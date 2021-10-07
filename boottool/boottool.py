@@ -61,7 +61,7 @@ from devicetool import write_grub_bios_partition
 from mounttool import block_special_path_is_mounted
 from mounttool import path_is_mounted
 from pathtool import write_line_to_file
-from portagetool import install_package
+from portagetool import install_packages
 from timetool import get_timestamp
 
 
@@ -339,9 +339,8 @@ def install_grub(ctx,
     sh.env_update()
     #set +u # disable nounset        # line 22 has an unbound variable: user_id /etc/profile.d/java-config-2.sh
     #source /etc/profile || exit 1
-    #set -o nounset
 
-    install_package('grub')
+    install_packages(['grub'])
 
     #if [[ "${root_filesystem}" == "zfs" ]];
     #then
