@@ -65,15 +65,18 @@ from portagetool import install_packages
 from timetool import get_timestamp
 
 
-def create_boot_device(ctx, *,
-                       device,
-                       partition_table,
-                       filesystem,
+def create_boot_device(ctx,
+                       *,
+                       device: Path,
+                       partition_table: str,
+                       filesystem: str,
                        force: bool,
                        verbose: bool,
-                       debug: bool,):
+                       debug: bool,
+                       ):
 
     assert device_is_not_a_partition(device=device, verbose=verbose, debug=debug,)
+    assert isinstance(device, Path)
 
     eprint("installing gpt/grub_bios/efi on boot device:",
            device,
@@ -90,51 +93,52 @@ def create_boot_device(ctx, *,
     #destroy_block_device_head_and_tail(device=device, force=True)
 
     if partition_table == 'gpt':
-        if filesystem != 'zfs':
-            ctx.invoke(destroy_block_device_head_and_tail,
-                       device=device,
-                       force=force,
-                       no_backup=False,
-                       verbose=True,
-                       debug=debug,)
-
-            ctx.invoke(write_gpt,
-                       device=device,
-                       no_wipe=True,
-                       force=force,
-                       no_backup=False,
-                       verbose=verbose,
-                       debug=debug,) # zfs does this
-
-    if filesystem == 'zfs':
-        # 2 if zfs made sda1 and sda9
-        ctx.invoke(write_grub_bios_partition,
+    #    if filesystem != 'zfs':
+        ctx.invoke(destroy_block_device_head_and_tail,
                    device=device,
-                   force=True,
-                   start='48s',
-                   end='1023s',
-                   partition_number='2',
-                   verbose=verbose,
-                   debug=debug,)
-    else:
-        ctx.invoke(write_grub_bios_partition,
-                   device=device,
-                   force=True,
-                   start='48s',
-                   end='1023s',
-                   partition_number='1',
-                   verbose=verbose,
+                   force=force,
+                   no_backup=False,
+                   verbose=True,
                    debug=debug,)
 
-    if filesystem != 'zfs':
-        ctx.invoke(write_efi_partition,
+        ctx.invoke(write_gpt,
                    device=device,
-                   force=True,
-                   start='1024s',
-                   end='18047s',
-                   partition_number='2',
+                   no_wipe=True,
+                   force=force,
+                   no_backup=False,
                    verbose=verbose,
-                   debug=debug,) # this is /dev/sda9 on zfs
+                   debug=debug,) # zfs does this
+
+    #if filesystem == 'zfs':
+    #    assert False
+    #    ## 2 if zfs made sda1 and sda9
+    #    #ctx.invoke(write_grub_bios_partition,
+    #    #           device=device,
+    #    #           force=True,
+    #    #           start='48s',
+    #    #           end='1023s',
+    #    #           partition_number='2',
+    #    #           verbose=verbose,
+    #    #           debug=debug,)
+    #else:
+    ctx.invoke(write_grub_bios_partition,
+               device=device,
+               force=True,
+               start='48s',
+               end='1023s',
+               partition_number='1',
+               verbose=verbose,
+               debug=debug,)
+
+    #if filesystem != 'zfs':
+    ctx.invoke(write_efi_partition,
+               device=device,
+               force=True,
+               start='1024s',
+               end='18047s',
+               partition_number='2',
+               verbose=verbose,
+               debug=debug,) # this is /dev/sda9 on zfs
         # 100M = (205824-1024)*512
         #ctx.invoke(write_efi_partition,
         #           device=device,
@@ -145,14 +149,14 @@ def create_boot_device(ctx, *,
         #           verbose=verbose,
         #           debug=debug,) # this is /dev/sda9 on zfs
 
-    if filesystem == 'zfs':
-        assert False
-        create_filesystem(device=device + '9',
-                          filesystem='fat16',
-                          force=True,
-                          raw_device=False,
-                          verbose=verbose,
-                          debug=debug,)
+    #if filesystem == 'zfs':
+    #    assert False
+    #    #create_filesystem(device=device + '9',
+    #    #                  filesystem='fat16',
+    #    #                  force=True,
+    #    #                  raw_device=False,
+    #    #                  verbose=verbose,
+    #    #                  debug=debug,)
 
 
 @click.group()
@@ -172,16 +176,24 @@ def cli(ctx,
 
 
 @cli.command()
-@click.option('--device', is_flag=False, required=True)
+@click.argument("device",
+                type=click.Path(exists=True,
+                                dir_okay=False,
+                                file_okay=True,
+                                allow_dash=False,
+                                path_type=Path,),
+                nargs=1,
+                required=True,)
 @click.option('--force', is_flag=True, required=False)
 @click.option('--verbose', is_flag=True, required=False)
 @click.option('--debug', is_flag=True, required=False)
 def write_boot_partition(*,
-                         device: str,
+                         device: Path,
                          force: bool,
                          verbose: bool,
                          debug: bool,
                          ):
+
     ic('creating boot partition (for grub config, stage2, vmlinuz) on:', device)
     assert device_is_not_a_partition(device=device, verbose=verbose, debug=debug,)
     assert path_is_block_special(device)
@@ -396,7 +408,7 @@ def install_grub(ctx,
 
     sh.grub_mkconfig('-o', '/boot/grub/grub.cfg', _out=sys.stdout, _err=sys.stderr)
 
-    with open(Path('/install_status'), 'a', encoding='utf-8') as fh:
+    with open(Path('/install_status'), 'a', encoding='utf8') as fh:
         fh.write(get_timestamp() + sys.argv[0] + 'complete'  + '\n')
 
 
