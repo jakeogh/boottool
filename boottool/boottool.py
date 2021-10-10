@@ -181,7 +181,7 @@ def write_boot_partition(*,
                          verbose: bool,
                          debug: bool,
                          ):
-    ic('creating boot partition  (for grub config, stage2, vmlinuz) on:', device)
+    ic('creating boot partition (for grub config, stage2, vmlinuz) on:', device)
     assert device_is_not_a_partition(device=device, verbose=verbose, debug=debug,)
     assert path_is_block_special(device)
     assert not block_special_path_is_mounted(device, verbose=verbose, debug=debug,)
