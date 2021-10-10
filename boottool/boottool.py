@@ -154,6 +154,7 @@ def create_boot_device(ctx, *,
                           verbose=verbose,
                           debug=debug,)
 
+
 @click.group()
 @click.option('--verbose', is_flag=True)
 @click.option('--debug', is_flag=True)
@@ -240,7 +241,8 @@ def create_boot_device_for_existing_root(ctx,
                                          configure_kernel: bool,
                                          force: bool,
                                          verbose: bool,
-                                         debug: bool,):
+                                         debug: bool,
+                                         ):
     if configure_kernel:
         _compile_kernel = True
 
@@ -394,7 +396,7 @@ def install_grub(ctx,
 
     sh.grub_mkconfig('-o', '/boot/grub/grub.cfg', _out=sys.stdout, _err=sys.stderr)
 
-    with open('/install_status', 'a') as fh:
+    with open(Path('/install_status'), 'a', encoding='utf-8') as fh:
         fh.write(get_timestamp() + sys.argv[0] + 'complete'  + '\n')
 
 
