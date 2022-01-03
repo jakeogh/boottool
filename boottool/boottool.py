@@ -24,15 +24,10 @@
 
 import os
 import sys
+from pathlib import Path
 from signal import SIG_DFL
 from signal import SIGPIPE
 from signal import signal
-
-import click
-import sh
-
-signal(SIGPIPE, SIG_DFL)
-from pathlib import Path
 from typing import ByteString
 from typing import Generator
 from typing import Iterable
@@ -43,18 +38,21 @@ from typing import Sequence
 from typing import Tuple
 from typing import Union
 
+import click
+import sh
 from asserttool import eprint
 from asserttool import ic
-from asserttool import nevd
 from asserttool import root_user
-from blocktool import add_partition_number_to_device
-from blocktool import create_filesystem
-from blocktool import destroy_block_device_head_and_tail
-from blocktool import device_is_not_a_partition
-from blocktool import path_is_block_special
-from blocktool import warn
+from asserttool import tv
+from clicktool import click_add_options
+from clicktool import click_global_options
 from compile_kernel.compile_kernel import kcompile
+#from devicetool import create_filesystem
+from devicetool import add_partition_number_to_device
+from devicetool import destroy_block_device_head_and_tail
+from devicetool import device_is_not_a_partition
 from devicetool import get_partuuid_for_partition
+from devicetool import path_is_block_special
 from devicetool import write_efi_partition
 from devicetool import write_gpt
 from devicetool import write_grub_bios_partition
@@ -63,6 +61,9 @@ from mounttool import path_is_mounted
 from pathtool import write_line_to_file
 from portagetool import install_packages
 from timetool import get_timestamp
+from warntool import warn
+
+signal(SIGPIPE, SIG_DFL)
 
 
 def create_boot_device(ctx,
@@ -71,11 +72,10 @@ def create_boot_device(ctx,
                        partition_table: str,
                        filesystem: str,
                        force: bool,
-                       verbose: bool,
-                       debug: bool,
+                       verbose: int,
                        ):
 
-    assert device_is_not_a_partition(device=device, verbose=verbose, debug=debug,)
+    assert device_is_not_a_partition(device=device, verbose=verbose,)
     assert isinstance(device, Path)
 
     eprint("installing gpt/grub_bios/efi on boot device:",
@@ -83,10 +83,10 @@ def create_boot_device(ctx,
            '(' + partition_table + ')',
            '(' + filesystem + ')',)
     assert path_is_block_special(device)
-    assert not block_special_path_is_mounted(device, verbose=verbose, debug=debug,)
+    assert not block_special_path_is_mounted(device, verbose=verbose,)
 
     if not force:
-        warn((device,), verbose=verbose, debug=debug,)
+        warn((device,), verbose=verbose,)
 
     # dont do this here, want to be able to let zfs make
     # the gpt and it's partitions before making bios_grub and EFI
@@ -99,7 +99,7 @@ def create_boot_device(ctx,
                    force=force,
                    no_backup=False,
                    verbose=True,
-                   debug=debug,)
+                   )
 
         ctx.invoke(write_gpt,
                    device=device,
@@ -107,7 +107,7 @@ def create_boot_device(ctx,
                    force=force,
                    no_backup=False,
                    verbose=verbose,
-                   debug=debug,) # zfs does this
+                   ) # zfs does this
 
     #if filesystem == 'zfs':
     #    assert False
@@ -119,7 +119,7 @@ def create_boot_device(ctx,
     #    #           end='1023s',
     #    #           partition_number='2',
     #    #           verbose=verbose,
-    #    #           debug=debug,)
+    #    #           )
     #else:
     ctx.invoke(write_grub_bios_partition,
                device=device,
@@ -128,7 +128,7 @@ def create_boot_device(ctx,
                end='1023s',
                partition_number='1',
                verbose=verbose,
-               debug=debug,)
+               )
 
     #if filesystem != 'zfs':
     ctx.invoke(write_efi_partition,
@@ -138,7 +138,7 @@ def create_boot_device(ctx,
                end='18047s',
                partition_number='2',
                verbose=verbose,
-               debug=debug,) # this is /dev/sda9 on zfs
+               ) # this is /dev/sda9 on zfs
         # 100M = (205824-1024)*512
         #ctx.invoke(write_efi_partition,
         #           device=device,
@@ -147,7 +147,7 @@ def create_boot_device(ctx,
         #           end='205824s',
         #           partition_number='2',
         #           verbose=verbose,
-        #           debug=debug,) # this is /dev/sda9 on zfs
+        #           ) # this is /dev/sda9 on zfs
 
     #if filesystem == 'zfs':
     #    assert False
@@ -156,23 +156,21 @@ def create_boot_device(ctx,
     #    #                  force=True,
     #    #                  raw_device=False,
     #    #                  verbose=verbose,
-    #    #                  debug=debug,)
+    #    #                  )
 
 
 @click.group()
-@click.option('--verbose', is_flag=True)
-@click.option('--debug', is_flag=True)
+@click_add_options(click_global_options)
 @click.pass_context
 def cli(ctx,
-        verbose: bool,
-        debug: bool,
+        verbose: int,
+        verbose_inf: bool,
         ):
 
-    null, end, verbose, debug = nevd(ctx=ctx,
-                                     printn=False,
-                                     ipython=False,
-                                     verbose=verbose,
-                                     debug=debug,)
+    tty, verbose = tv(ctx=ctx,
+                      verbose=verbose,
+                      verbose_inf=verbose_inf,
+                      )
 
 
 @cli.command()
@@ -185,22 +183,22 @@ def cli(ctx,
                 nargs=1,
                 required=True,)
 @click.option('--force', is_flag=True, required=False)
-@click.option('--verbose', is_flag=True, required=False)
-@click.option('--debug', is_flag=True, required=False)
+@click_add_options(click_global_options)
+@click.pass_context
 def write_boot_partition(*,
                          device: Path,
                          force: bool,
-                         verbose: bool,
-                         debug: bool,
+                         verbose: int,
+                         verbose_inf: bool,
                          ):
 
     ic('creating boot partition (for grub config, stage2, vmlinuz) on:', device)
-    assert device_is_not_a_partition(device=device, verbose=verbose, debug=debug,)
+    assert device_is_not_a_partition(device=device, verbose=verbose,)
     assert path_is_block_special(device)
-    assert not block_special_path_is_mounted(device, verbose=verbose, debug=debug,)
+    assert not block_special_path_is_mounted(device, verbose=verbose,)
 
     if not force:
-        warn((device,), verbose=verbose, debug=debug,)
+        warn((device,), verbose=verbose,)
 
     partition_number = '3'
     partition = add_partition_number_to_device(device=device,
@@ -217,12 +215,12 @@ def write_boot_partition(*,
 
 @cli.command()
 @click.argument("boot_device")
-@click.option('--verbose', is_flag=True)
-@click.option('--debug', is_flag=True)
+@click_add_options(click_global_options)
+@click.pass_context
 def make_hybrid_mbr(*,
                     boot_device: str,
-                    verbose: bool,
-                    debug: bool,
+                    verbose: int,
+                    verbose_inf: bool,
                     ):
 
     if not root_user():
@@ -242,8 +240,7 @@ def make_hybrid_mbr(*,
 @click.option('--force',                       is_flag=True,  required=False)
 @click.option('--compile-kernel', "_compile_kernel", is_flag=True, required=False)
 @click.option('--configure-kernel',            is_flag=True,  required=False)
-@click.option('--verbose',                     is_flag=True,  required=False)
-@click.option('--debug',                       is_flag=True,  required=False)
+@click_add_options(click_global_options)
 @click.pass_context
 def create_boot_device_for_existing_root(ctx,
                                          boot_device,
@@ -252,8 +249,8 @@ def create_boot_device_for_existing_root(ctx,
                                          _compile_kernel: bool,
                                          configure_kernel: bool,
                                          force: bool,
-                                         verbose: bool,
-                                         debug: bool,
+                                         verbose: int,
+                                         verbose_inf: bool,
                                          ):
     if configure_kernel:
         _compile_kernel = True
@@ -264,50 +261,50 @@ def create_boot_device_for_existing_root(ctx,
 
     mount_path_boot = Path('/boot')
     ic(mount_path_boot)
-    assert not path_is_mounted(mount_path_boot, verbose=verbose, debug=debug,)
+    assert not path_is_mounted(mount_path_boot, verbose=verbose,)
 
     mount_path_boot_efi = mount_path_boot / Path('efi')
     ic(mount_path_boot_efi)
-    assert not path_is_mounted(mount_path_boot_efi, verbose=verbose, debug=debug,)
+    assert not path_is_mounted(mount_path_boot_efi, verbose=verbose,)
 
-    assert device_is_not_a_partition(device=boot_device, verbose=verbose, debug=debug,)
+    assert device_is_not_a_partition(device=boot_device, verbose=verbose,)
 
     ic('installing grub on boot device:',
        boot_device,
        boot_device_partition_table,
        boot_filesystem)
     assert path_is_block_special(boot_device)
-    assert not block_special_path_is_mounted(boot_device, verbose=verbose, debug=debug,)
+    assert not block_special_path_is_mounted(boot_device, verbose=verbose,)
     if not force:
-        warn((boot_device,), verbose=verbose, debug=debug,)
+        warn((boot_device,), verbose=verbose,)
     create_boot_device(ctx,
                        device=boot_device,
                        partition_table=boot_device_partition_table,
                        filesystem=boot_filesystem,
                        force=True,
                        verbose=verbose,
-                       debug=debug,)
+                       )
     ctx.invoke(write_boot_partition,
                device=boot_device,
                force=True,
                verbose=verbose,
-               debug=debug,)
+               )
 
     hybrid_mbr_command = sh.Command("/home/cfg/_myapps/sendgentoo/sendgentoo/gpart_make_hybrid_mbr.sh")
     hybrid_mbr_command(boot_device, _out=sys.stdout, _err=sys.stderr)
 
     os.makedirs(mount_path_boot, exist_ok=True)
-    boot_partition_path = add_partition_number_to_device(device=boot_device, partition_number="3")
-    assert not path_is_mounted(mount_path_boot, verbose=verbose, debug=debug,)
+    boot_partition_path = add_partition_number_to_device(device=boot_device, partition_number="3", verbose=verbose,)
+    assert not path_is_mounted(mount_path_boot, verbose=verbose,)
     sh.mount(boot_partition_path, str(mount_path_boot), _out=sys.stdout, _err=sys.stderr)
-    assert path_is_mounted(mount_path_boot, verbose=verbose, debug=debug,)
+    assert path_is_mounted(mount_path_boot, verbose=verbose,)
 
     os.makedirs(mount_path_boot_efi, exist_ok=True)
 
-    efi_partition_path = add_partition_number_to_device(device=boot_device, partition_number="2")
-    assert not path_is_mounted(mount_path_boot_efi, verbose=verbose, debug=debug,)
+    efi_partition_path = add_partition_number_to_device(device=boot_device, partition_number="2", verbose=verbose,)
+    assert not path_is_mounted(mount_path_boot_efi, verbose=verbose,)
     sh.mount(efi_partition_path, str(mount_path_boot_efi), _out=sys.stdout, _err=sys.stderr)
-    assert path_is_mounted(mount_path_boot_efi, verbose=verbose, debug=debug,)
+    assert path_is_mounted(mount_path_boot_efi, verbose=verbose,)
 
     install_grub_command = sh.Command("/home/cfg/_myapps/sendgentoo/sendgentoo/post_chroot_install_grub.sh")
     install_grub_command(boot_device, _out=sys.stdout, _err=sys.stderr)
@@ -317,7 +314,7 @@ def create_boot_device_for_existing_root(ctx,
                  force=force,
                  no_check_boot=True,
                  verbose=verbose,
-                 debug=debug)
+                 )
 
     sh.grub_mkconfig('-o', '/boot/grub/grub.cfg', _out=sys.stdout, _err=sys.stderr)
 
@@ -331,22 +328,20 @@ def create_boot_device_for_existing_root(ctx,
                                 path_type=Path,),
                 nargs=1,
                 required=True,)
-@click.option('--verbose', is_flag=True)
-@click.option('--debug', is_flag=True)
+@click_add_options(click_global_options)
 @click.pass_context
 def install_grub(ctx,
                  boot_device: Path,
-                 verbose: bool,
-                 debug: bool,
+                 verbose: int,
+                 verbose_inf: bool,
                  ):
 
-    null, end, verbose, debug = nevd(ctx=ctx,
-                                     printn=False,
-                                     ipython=False,
-                                     verbose=verbose,
-                                     debug=debug,)
+    tty, verbose = tv(ctx=ctx,
+                      verbose=verbose,
+                      verbose_inf=verbose_inf,
+                      )
 
-    if not path_is_mounted(Path("/boot/efi"), verbose=verbose, debug=debug,):
+    if not path_is_mounted(Path("/boot/efi"), verbose=verbose,):
         ic("/boot/efi not mounted. Exiting.")
         sys.exit(1)
 
@@ -368,7 +363,7 @@ def install_grub(ctx,
                        line='GRUB_PRELOAD_MODULES="part_gpt part_msdos"' + '\n',
                        unique=True,
                        verbose=verbose,
-                       debug=debug,)
+                       )
 
     root_partition = sh.grub_probe('--target=device', '/')
     ic(root_partition)
@@ -376,14 +371,14 @@ def install_grub(ctx,
     ic(root_partition)
     #partition_uuid_command = sh.Command('/home/cfg/linux/hardware/disk/blkid/PARTUUID')
     #partuuid = partition_uuid_command(root_partition, _err=sys.stderr, _out=sys.stdout)
-    partuuid = get_partuuid_for_partition(root_partition, verbose=verbose, debug=debug)
+    partuuid = get_partuuid_for_partition(root_partition, verbose=verbose,)
     ic('GRUB_DEVICE partuuid:', partuuid)
 
     write_line_to_file(path=Path('/etc/default/grub'),
                        line='GRUB_DEVICE="PARTUUID={partuuid}"'.format(partuuid=partuuid) + '\n',
                        unique=True,
                        verbose=verbose,
-                       debug=debug,)
+                       )
     partuuid_root_device_command = sh.Command('/home/cfg/linux/disk/blkid/PARTUUID_root_device')
     partuuid_root_device = partuuid_root_device_command().strip()
 
@@ -392,14 +387,14 @@ def install_grub(ctx,
                        line=partuuid_root_device_fstab_line + '\n',
                        unique=True,
                        verbose=verbose,
-                       debug=debug,)
+                       )
 
     #grep -E "^GRUB_CMDLINE_LINUX=\"net.ifnames=0 rootflags=noatime irqpoll\"" /etc/default/grub || { echo "GRUB_CMDLINE_LINUX=\"net.ifnames=0 rootflags=noatime irqpoll\"" >> /etc/default/grub ; }
     write_line_to_file(path=Path('/etc/default/grub'),
                        line='GRUB_CMDLINE_LINUX="net.ifnames=0 rootflags=noatime intel_iommu=off"' + '\n',
                        unique=True,
                        verbose=verbose,
-                       debug=debug,)
+                       )
 
     sh.ln('-sf', '/proc/self/mounts', '/etc/mtab')
 
