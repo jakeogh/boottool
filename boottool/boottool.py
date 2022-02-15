@@ -40,12 +40,11 @@ from typing import Union
 
 import click
 import sh
-from asserttool import eprint
 from asserttool import ic
 from asserttool import root_user
-from asserttool import tv
 from clicktool import click_add_options
 from clicktool import click_global_options
+from clicktool import tv
 from compile_kernel.compile_kernel import kcompile
 #from devicetool import create_filesystem
 from devicetool import add_partition_number_to_device
@@ -56,6 +55,7 @@ from devicetool import path_is_block_special
 from devicetool import write_efi_partition
 from devicetool import write_gpt
 from devicetool import write_grub_bios_partition
+from eprint import eprint
 from mounttool import block_special_path_is_mounted
 from mounttool import path_is_mounted
 from pathtool import write_line_to_file
@@ -72,7 +72,7 @@ def create_boot_device(ctx,
                        partition_table: str,
                        filesystem: str,
                        force: bool,
-                       verbose: int,
+                       verbose: Union[bool, int, float],
                        ):
 
     assert device_is_not_a_partition(device=device, verbose=verbose,)
@@ -159,11 +159,11 @@ def create_boot_device(ctx,
     #    #                  )
 
 
-@click.group()
+@click.group(no_args_is_help=True)
 @click_add_options(click_global_options)
 @click.pass_context
 def cli(ctx,
-        verbose: int,
+        verbose: Union[bool, int, float],
         verbose_inf: bool,
         ):
 
@@ -188,7 +188,7 @@ def cli(ctx,
 def write_boot_partition(*,
                          device: Path,
                          force: bool,
-                         verbose: int,
+                         verbose: Union[bool, int, float],
                          verbose_inf: bool,
                          ):
 
@@ -219,7 +219,7 @@ def write_boot_partition(*,
 @click.pass_context
 def make_hybrid_mbr(*,
                     boot_device: str,
-                    verbose: int,
+                    verbose: Union[bool, int, float],
                     verbose_inf: bool,
                     ):
 
@@ -249,7 +249,7 @@ def create_boot_device_for_existing_root(ctx,
                                          _compile_kernel: bool,
                                          configure_kernel: bool,
                                          force: bool,
-                                         verbose: int,
+                                         verbose: Union[bool, int, float],
                                          verbose_inf: bool,
                                          ):
     if configure_kernel:
@@ -332,7 +332,7 @@ def create_boot_device_for_existing_root(ctx,
 @click.pass_context
 def install_grub(ctx,
                  boot_device: Path,
-                 verbose: int,
+                 verbose: Union[bool, int, float],
                  verbose_inf: bool,
                  ):
 
@@ -349,7 +349,7 @@ def install_grub(ctx,
     #set +u # disable nounset        # line 22 has an unbound variable: user_id /etc/profile.d/java-config-2.sh
     #source /etc/profile || exit 1
 
-    install_packages(['grub'])
+    install_packages(['grub'], verbose=verbose,)
 
     #if [[ "${root_filesystem}" == "zfs" ]];
     #then
