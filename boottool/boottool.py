@@ -257,12 +257,12 @@ def write_boot_partition(
 
 
 @cli.command()
-@click.argument("boot_device")
+@click.argument("boot_device", type=click.Path(path_type=Path))
 @click_add_options(click_global_options)
 @click.pass_context
 def make_hybrid_mbr(
     *,
-    boot_device: str,
+    boot_device: Path,
     verbose: Union[bool, int, float],
     verbose_inf: bool,
     dict_input: bool,
