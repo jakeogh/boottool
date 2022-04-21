@@ -261,6 +261,7 @@ def write_boot_partition(
 @click_add_options(click_global_options)
 @click.pass_context
 def make_hybrid_mbr(
+    ctx,
     *,
     boot_device: Path,
     verbose: Union[bool, int, float],
@@ -445,6 +446,7 @@ def create_boot_device_for_existing_root(
 @click.pass_context
 def install_grub(
     ctx,
+    *,
     boot_device: Path,
     verbose: Union[bool, int, float],
     verbose_inf: bool,
