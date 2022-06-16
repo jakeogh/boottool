@@ -472,6 +472,7 @@ def install_grub(
 
     install_packages(
         ["grub"],
+        force=False,
         verbose=verbose,
     )
 
