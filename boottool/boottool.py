@@ -1,26 +1,25 @@
 #!/usr/bin/env python3
 # -*- coding: utf8 -*-
 
-# flake8: noqa           # flake8 has no per file settings :(
-# pylint: disable=C0111  # docstrings are always outdated and wrong
+
+# pylint: disable=missing-docstring               # [C0111] docstrings are always outdated and wrong
 # pylint: disable=C0114  #      Missing module docstring (missing-module-docstring)
-# pylint: disable=W0511  # todo is encouraged
-# pylint: disable=C0301  # line too long
-# pylint: disable=R0902  # too many instance attributes
-# pylint: disable=C0302  # too many lines in module
-# pylint: disable=C0103  # single letter var names, func name too descriptive
-# pylint: disable=R0911  # too many return statements
-# pylint: disable=R0912  # too many branches
-# pylint: disable=R0915  # too many statements
-# pylint: disable=R0913  # too many arguments
-# pylint: disable=R1702  # too many nested blocks
-# pylint: disable=R0914  # too many local variables
-# pylint: disable=R0903  # too few public methods
-# pylint: disable=E1101  # no member for base
-# pylint: disable=W0201  # attribute defined outside __init__
-# pylint: disable=R0916  # Too many boolean expressions in if statement
-# pylint: disable=C0305  # Trailing newlines editor should fix automatically, pointless warning
-# pylint: disable=C0413  # TEMP isort issue [wrong-import-position] Import "from pathlib import Path" should be placed at the top of the module [C0413]
+# pylint: disable=fixme                           # [W0511] todo is encouraged
+# pylint: disable=line-too-long                   # [C0301]
+# pylint: disable=too-many-instance-attributes    # [R0902]
+# pylint: disable=too-many-lines                  # [C0302] too many lines in module
+# pylint: disable=invalid-name                    # [C0103] single letter var names, name too descriptive
+# pylint: disable=too-many-return-statements      # [R0911]
+# pylint: disable=too-many-branches               # [R0912]
+# pylint: disable=too-many-statements             # [R0915]
+# pylint: disable=too-many-arguments              # [R0913]
+# pylint: disable=too-many-nested-blocks          # [R1702]
+# pylint: disable=too-many-locals                 # [R0914]
+# pylint: disable=too-few-public-methods          # [R0903]
+# pylint: disable=no-member                       # [E1101] no member for base
+# pylint: disable=attribute-defined-outside-init  # [W0201]
+# pylint: disable=too-many-boolean-expressions    # [R0916] in if statement
+
 
 import os
 import sys
@@ -28,15 +27,6 @@ from pathlib import Path
 from signal import SIG_DFL
 from signal import SIGPIPE
 from signal import signal
-from typing import ByteString
-from typing import Generator
-from typing import Iterable
-from typing import Iterator
-from typing import List
-from typing import Optional
-from typing import Sequence
-from typing import Tuple
-from typing import Union
 
 import click
 import sh
@@ -46,7 +36,6 @@ from clicktool import click_add_options
 from clicktool import click_global_options
 from clicktool import tv
 from compile_kernel.compile_kernel import kcompile
-# from devicetool import create_filesystem
 from devicetool import add_partition_number_to_device
 from devicetool import destroy_block_device_head_and_tail
 from devicetool import device_is_not_a_partition
@@ -63,6 +52,8 @@ from portagetool import install_packages
 from timetool import get_timestamp
 from warntool import warn
 
+# from devicetool import create_filesystem
+
 signal(SIGPIPE, SIG_DFL)
 
 
@@ -73,7 +64,7 @@ def create_boot_device(
     partition_table: str,
     filesystem: str,
     force: bool,
-    verbose: Union[bool, int, float],
+    verbose: bool | int | float,
 ):
 
     assert device_is_not_a_partition(
@@ -175,14 +166,14 @@ def create_boot_device(
     #    #                  )
 
 
-@click.group(no_args_is_help=True)
+@click.group(no_args_is_help=True, cls=AHGroup)
 @click_add_options(click_global_options)
 @click.pass_context
 def cli(
     ctx,
-    verbose: Union[bool, int, float],
+    verbose: bool | int | float,
     verbose_inf: bool,
-    dict_input: bool,
+    dict_output: bool,
 ):
 
     tty, verbose = tv(
@@ -212,9 +203,9 @@ def write_boot_partition(
     *,
     device: Path,
     force: bool,
-    verbose: Union[bool, int, float],
+    verbose: bool | int | float,
     verbose_inf: bool,
-    dict_input: bool,
+    dict_output: bool,
 ):
 
     ic("creating boot partition (for grub config, stage2, vmlinuz) on:", device)
@@ -264,9 +255,9 @@ def make_hybrid_mbr(
     ctx,
     *,
     boot_device: Path,
-    verbose: Union[bool, int, float],
+    verbose: bool | int | float,
     verbose_inf: bool,
-    dict_input: bool,
+    dict_output: bool,
 ):
 
     if not root_user():
@@ -310,9 +301,9 @@ def create_boot_device_for_existing_root(
     _compile_kernel: bool,
     configure_kernel: bool,
     force: bool,
-    verbose: Union[bool, int, float],
+    verbose: bool | int | float,
     verbose_inf: bool,
-    dict_input: bool,
+    dict_output: bool,
 ):
     if configure_kernel:
         _compile_kernel = True
@@ -448,9 +439,9 @@ def install_grub(
     ctx,
     *,
     boot_device: Path,
-    verbose: Union[bool, int, float],
+    verbose: bool | int | float,
     verbose_inf: bool,
-    dict_input: bool,
+    dict_output: bool,
 ):
 
     tty, verbose = tv(
