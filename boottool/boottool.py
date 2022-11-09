@@ -19,7 +19,7 @@
 # pylint: disable=no-member                       # [E1101] no member for base
 # pylint: disable=attribute-defined-outside-init  # [W0201]
 # pylint: disable=too-many-boolean-expressions    # [R0916] in if statement
-
+from __future__ import annotations
 
 import os
 import sys
@@ -32,6 +32,7 @@ import click
 import sh
 from asserttool import ic
 from asserttool import root_user
+from click_auto_help import AHGroup
 from clicktool import click_add_options
 from clicktool import click_global_options
 from clicktool import tv
@@ -132,7 +133,7 @@ def create_boot_device(
         force=True,
         start="48s",
         end="1023s",
-        partition_number="1",
+        partition_number=1,
         verbose=verbose,
     )
 
@@ -143,7 +144,7 @@ def create_boot_device(
         force=True,
         start="1024s",
         end="18047s",
-        partition_number="2",
+        partition_number=2,
         verbose=verbose,
     )  # this is /dev/sda9 on zfs
     # 100M = (205824-1024)*512
@@ -225,7 +226,7 @@ def write_boot_partition(
             verbose=verbose,
         )
 
-    partition_number = "3"
+    partition_number = 3
     partition = add_partition_number_to_device(
         device=device, partition_number=partition_number, verbose=verbose
     )
@@ -370,7 +371,7 @@ def create_boot_device_for_existing_root(
     os.makedirs(mount_path_boot, exist_ok=True)
     boot_partition_path = add_partition_number_to_device(
         device=boot_device,
-        partition_number="3",
+        partition_number=3,
         verbose=verbose,
     )
     assert not path_is_mounted(
@@ -389,7 +390,7 @@ def create_boot_device_for_existing_root(
 
     efi_partition_path = add_partition_number_to_device(
         device=boot_device,
-        partition_number="2",
+        partition_number=2,
         verbose=verbose,
     )
     assert not path_is_mounted(
@@ -412,6 +413,7 @@ def create_boot_device_for_existing_root(
     if _compile_kernel:
         kcompile(
             configure=configure_kernel,
+            configure_only=False,
             force=force,
             no_check_boot=True,
             verbose=verbose,
@@ -559,8 +561,3 @@ def install_grub(
 
     with open(Path("/install_status"), "a", encoding="utf8") as fh:
         fh.write(get_timestamp() + sys.argv[0] + "complete" + "\n")
-
-
-if __name__ == "__main__":
-    # pylint: disable=E1120
-    cli()
