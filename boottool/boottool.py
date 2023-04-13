@@ -65,9 +65,8 @@ def create_boot_device(
     partition_table: str,
     filesystem: str,
     force: bool,
-    verbose: bool | int | float,
+    verbose: bool | int | float = False,
 ):
-
     assert device_is_not_a_partition(
         device=device,
         verbose=verbose,
@@ -172,11 +171,10 @@ def create_boot_device(
 @click.pass_context
 def cli(
     ctx,
-    verbose: bool | int | float,
     verbose_inf: bool,
     dict_output: bool,
+    verbose: bool | int | float = False,
 ):
-
     tty, verbose = tv(
         ctx=ctx,
         verbose=verbose,
@@ -204,11 +202,10 @@ def write_boot_partition(
     *,
     device: Path,
     force: bool,
-    verbose: bool | int | float,
+    verbose: bool | int | float = False,
     verbose_inf: bool,
     dict_output: bool,
 ):
-
     ic("creating boot partition (for grub config, stage2, vmlinuz) on:", device)
     assert device_is_not_a_partition(
         device=device,
@@ -256,11 +253,10 @@ def make_hybrid_mbr(
     ctx,
     *,
     boot_device: Path,
-    verbose: bool | int | float,
+    verbose: bool | int | float = False,
     verbose_inf: bool,
     dict_output: bool,
 ):
-
     if not root_user():
         ic("You must be root.")
         sys.exit(1)
@@ -302,9 +298,9 @@ def create_boot_device_for_existing_root(
     _compile_kernel: bool,
     configure_kernel: bool,
     force: bool,
-    verbose: bool | int | float,
     verbose_inf: bool,
     dict_output: bool,
+    verbose: bool | int | float = False,
 ):
     if configure_kernel:
         _compile_kernel = True
@@ -441,11 +437,10 @@ def install_grub(
     ctx,
     *,
     boot_device: Path,
-    verbose: bool | int | float,
     verbose_inf: bool,
     dict_output: bool,
+    verbose: bool | int | float = False,
 ):
-
     tty, verbose = tv(
         ctx=ctx,
         verbose=verbose,
