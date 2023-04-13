@@ -479,9 +479,9 @@ def install_grub(
         verbose=verbose,
     )
 
-    root_partition = sh.grub_probe("--target=device", "/")
+    root_partition = Path(sh.grub_probe("--target=device", "/").strip())
     ic(root_partition)
-    assert root_partition.startswith("/dev/")
+    assert root_partition.as_posix().startswith("/dev/")
     ic(root_partition)
     # partition_uuid_command = sh.Command('/home/cfg/linux/hardware/disk/blkid/PARTUUID')
     # partuuid = partition_uuid_command(root_partition, _err=sys.stderr, _out=sys.stdout)
