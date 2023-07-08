@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import os
 import sys
+from importlib import resources
 from pathlib import Path
 from signal import SIG_DFL
 from signal import SIGPIPE
@@ -263,10 +264,13 @@ def make_hybrid_mbr(
 
     assert path_is_block_special(boot_device)
 
-    make_hybrid_mbr_command = sh.Command(
-        "/home/cfg/_myapps/sendgentoo/sendgentoo/gpart_make_hybrid_mbr.sh"
-    )
-    make_hybrid_mbr_command(boot_device, _out=sys.stdout, _err=sys.stderr)
+    with resources.path(
+        "boottool", "gpart_make_hybrid_mbr.sh"
+    ) as _hybrid_mbr_script_path:
+        ic(_hybrid_mbr_script_path)
+
+        make_hybrid_mbr_command = sh.Command(_hybrid_mbr_script_path)
+        make_hybrid_mbr_command(boot_device, _out=sys.stdout, _err=sys.stderr)
 
 
 @cli.command()
