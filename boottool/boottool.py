@@ -32,6 +32,7 @@ from signal import signal
 import click
 import sh
 from asserttool import ic
+from asserttool import icp
 from asserttool import root_user
 from click_auto_help import AHGroup
 from clicktool import click_add_options
@@ -267,10 +268,15 @@ def make_hybrid_mbr(
     with resources.path(
         "boottool", "gpart_make_hybrid_mbr.sh"
     ) as _hybrid_mbr_script_path:
-        ic(_hybrid_mbr_script_path)
+        icp(_hybrid_mbr_script_path)
 
         make_hybrid_mbr_command = sh.Command(_hybrid_mbr_script_path)
-        make_hybrid_mbr_command(boot_device, _out=sys.stdout, _err=sys.stderr)
+        make_hybrid_mbr_command(
+            _hybrid_mbr_script_path.parent / Path("gpart_make_hybrid_mbr.exp"),
+            boot_device,
+            _out=sys.stdout,
+            _err=sys.stderr,
+        )
 
 
 @cli.command()
