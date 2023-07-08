@@ -38,13 +38,13 @@ from clicktool import click_global_options
 from clicktool import tv
 from compile_kernel.compile_kernel import kcompile
 from devicetool import add_partition_number_to_device
-from devicetool import destroy_block_device_head_and_tail
 from devicetool import device_is_not_a_partition
 from devicetool import get_partuuid_for_partition
 from devicetool import path_is_block_special
-from devicetool import write_efi_partition
-from devicetool import write_gpt
-from devicetool import write_grub_bios_partition
+from devicetool.cli import destroy_block_device_head_and_tail
+from devicetool.cli import write_efi_partition
+from devicetool.cli import write_gpt
+from devicetool.cli import write_grub_bios_partition
 from eprint import eprint
 from mounttool import block_special_path_is_mounted
 from mounttool import path_is_mounted
