@@ -315,6 +315,7 @@ def create_boot_device_for_existing_root(
     if configure_kernel:
         _compile_kernel = True
 
+    assert False  ## needs to ctx.invoke(install_brub)
     if not root_user():
         ic("You must be root.")
         sys.exit(1)
@@ -369,9 +370,7 @@ def create_boot_device_for_existing_root(
         verbose=verbose,
     )
 
-    hybrid_mbr_command = sh.Command(
-        "/home/cfg/_myapps/sendgentoo/sendgentoo/gpart_make_hybrid_mbr.sh"
-    )
+    hybrid_mbr_command = sh.Command("gpart_make_hybrid_mbr.sh")
     hybrid_mbr_command(boot_device, _out=sys.stdout, _err=sys.stderr)
 
     os.makedirs(mount_path_boot, exist_ok=True)
@@ -411,9 +410,7 @@ def create_boot_device_for_existing_root(
         verbose=verbose,
     )
 
-    install_grub_command = sh.Command(
-        "/home/cfg/_myapps/sendgentoo/sendgentoo/post_chroot_install_grub.sh"
-    )
+    install_grub_command = sh.Command("post_chroot_install_grub.sh")
     install_grub_command(boot_device, _out=sys.stdout, _err=sys.stderr)
 
     if _compile_kernel:
@@ -428,38 +425,11 @@ def create_boot_device_for_existing_root(
     sh.grub_mkconfig("-o", "/boot/grub/grub.cfg", _out=sys.stdout, _err=sys.stderr)
 
 
-@cli.command()
-@click.argument(
-    "boot_device",
-    type=click.Path(
-        exists=True,
-        dir_okay=False,
-        file_okay=True,
-        allow_dash=False,
-        path_type=Path,
-    ),
-    nargs=1,
-    required=True,
-)
-@click_add_options(click_global_options)
-@click.pass_context
 def install_grub(
-    ctx,
-    *,
     boot_device: Path,
-    verbose_inf: bool,
-    dict_output: bool,
-    verbose: bool | int | float = False,
 ):
-    tty, verbose = tv(
-        ctx=ctx,
-        verbose=verbose,
-        verbose_inf=verbose_inf,
-    )
-
     if not path_is_mounted(
         Path("/boot/efi"),
-        verbose=verbose,
     ):
         ic("/boot/efi not mounted. Exiting.")
         sys.exit(1)
@@ -471,7 +441,6 @@ def install_grub(
     install_packages(
         ["grub"],
         force=False,
-        verbose=verbose,
     )
 
     # if [[ "${root_filesystem}" == "zfs" ]];
@@ -486,7 +455,6 @@ def install_grub(
         path=Path("/etc/default/grub"),
         line='GRUB_PRELOAD_MODULES="part_gpt part_msdos"' + "\n",
         unique=True,
-        verbose=verbose,
     )
 
     root_partition = Path(sh.grub_probe("--target=device", "/").strip())
@@ -497,7 +465,6 @@ def install_grub(
     # partuuid = partition_uuid_command(root_partition, _err=sys.stderr, _out=sys.stdout)
     partuuid = get_partuuid_for_partition(
         root_partition,
-        verbose=verbose,
     )
     ic("GRUB_DEVICE partuuid:", partuuid)
 
@@ -505,7 +472,6 @@ def install_grub(
         path=Path("/etc/default/grub"),
         line=f'GRUB_DEVICE="PARTUUID={partuuid}"' + "\n",
         unique=True,
-        verbose=verbose,
     )
     partuuid_root_device_command = sh.Command(
         "/home/cfg/linux/disk/blkid/PARTUUID_root_device"
@@ -525,7 +491,6 @@ def install_grub(
         path=Path("/etc/fstab"),
         line=partuuid_root_device_fstab_line + "\n",
         unique=True,
-        verbose=verbose,
     )
 
     # grep -E "^GRUB_CMDLINE_LINUX=\"net.ifnames=0 rootflags=noatime irqpoll\"" /etc/default/grub || { echo "GRUB_CMDLINE_LINUX=\"net.ifnames=0 rootflags=noatime irqpoll\"" >> /etc/default/grub ; }
@@ -534,7 +499,6 @@ def install_grub(
         line='GRUB_CMDLINE_LINUX="net.ifnames=0 rootflags=noatime intel_iommu=off"'
         + "\n",
         unique=True,
-        verbose=verbose,
     )
 
     sh.ln("-sf", "/proc/self/mounts", "/etc/mtab")
@@ -566,3 +530,35 @@ def install_grub(
 
     with open(Path("/install_status"), "a", encoding="utf8") as fh:
         fh.write(get_timestamp() + sys.argv[0] + "complete" + "\n")
+
+
+@cli.command("install-grub")
+@click.argument(
+    "boot_device",
+    type=click.Path(
+        exists=True,
+        dir_okay=False,
+        file_okay=True,
+        allow_dash=False,
+        path_type=Path,
+    ),
+    nargs=1,
+    required=True,
+)
+@click_add_options(click_global_options)
+@click.pass_context
+def _install_grub(
+    ctx,
+    *,
+    boot_device: Path,
+    verbose_inf: bool,
+    dict_output: bool,
+    verbose: bool | int | float = False,
+):
+    tty, verbose = tv(
+        ctx=ctx,
+        verbose=verbose,
+        verbose_inf=verbose_inf,
+    )
+
+    install_grub(boot_device=boot_device)
