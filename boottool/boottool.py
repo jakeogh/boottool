@@ -457,10 +457,12 @@ def install_grub(
         unique=True,
     )
 
-    root_partition = Path(sh.grub_probe("--target=device", "/").strip())
-    ic(root_partition)
+    from devicetool import get_root_device
+
+    root_partition = get_root_device()
+    # root_partition = Path(sh.grub_probe("--target=device", "/").strip())
+    icp(root_partition)
     assert root_partition.as_posix().startswith("/dev/")
-    ic(root_partition)
     # partition_uuid_command = sh.Command('/home/cfg/linux/hardware/disk/blkid/PARTUUID')
     # partuuid = partition_uuid_command(root_partition, _err=sys.stderr, _out=sys.stdout)
     partuuid = get_partuuid_for_partition(
@@ -473,10 +475,14 @@ def install_grub(
         line=f'GRUB_DEVICE="PARTUUID={partuuid}"' + "\n",
         unique=True,
     )
-    partuuid_root_device_command = sh.Command(
-        "/home/cfg/linux/disk/blkid/PARTUUID_root_device"
-    )
-    partuuid_root_device = partuuid_root_device_command().strip()
+
+    partuuid_root_device = get_partuuid_for_partition(partition=root_partition)
+
+    # partuuid_root_device_command = sh.Command(
+    #    "/home/cfg/linux/disk/blkid/PARTUUID_root_device"
+    # )
+    # partuuid_root_device = partuuid_root_device_command().strip()
+    icp(partuuid_root_device)
 
     partuuid_root_device_fstab_line = (
         "PARTUUID="
