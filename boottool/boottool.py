@@ -502,8 +502,8 @@ def install_grub(
     # grep -E "^GRUB_CMDLINE_LINUX=\"net.ifnames=0 rootflags=noatime irqpoll\"" /etc/default/grub || { echo "GRUB_CMDLINE_LINUX=\"net.ifnames=0 rootflags=noatime irqpoll\"" >> /etc/default/grub ; }
     write_line_to_file(
         path=Path("/etc/default/grub"),
-        line='GRUB_CMDLINE_LINUX="net.ifnames=0 rootflags=noatime intel_iommu=off"'
-        + "\n",
+        # line='GRUB_CMDLINE_LINUX="net.ifnames=0 rootflags=noatime intel_iommu=off"'
+        line='GRUB_CMDLINE_LINUX="net.ifnames=0 rootflags=noatime"' + "\n",
         unique=True,
     )
 
