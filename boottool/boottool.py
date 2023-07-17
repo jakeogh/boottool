@@ -517,7 +517,7 @@ def install_grub(
         "--removable",
         "--recheck",
         "--no-rs-codes",
-        "--debug-image=all",
+        # "--debug-image=all",
         boot_device,
         _out=sys.stdout,
         _err=sys.stderr,
