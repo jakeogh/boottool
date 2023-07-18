@@ -503,7 +503,8 @@ def install_grub(
     write_line_to_file(
         path=Path("/etc/default/grub"),
         # line='GRUB_CMDLINE_LINUX="net.ifnames=0 rootflags=noatime intel_iommu=off"'
-        line='GRUB_CMDLINE_LINUX="net.ifnames=0 rootflags=noatime"' + "\n",
+        line='GRUB_CMDLINE_LINUX="net.ifnames=0 rootflags=noatime earlyprintk=vga"'
+        + "\n",
         unique=True,
     )
 
