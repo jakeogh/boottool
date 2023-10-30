@@ -37,22 +37,23 @@ from asserttool import root_user
 from click_auto_help import AHGroup
 from clicktool import click_add_options
 from clicktool import click_global_options
-from clicktool import tv
+from clicktool import tvicgvd
 from compile_kernel.compile_kernel import kcompile
+from devicelabeltool import write as write_device_label
 from devicetool import add_partition_number_to_device
 from devicetool import device_is_not_a_partition
 from devicetool import get_partuuid_for_partition
 from devicetool import path_is_block_special
 from devicetool.cli import destroy_block_device_head_and_tail
 from devicetool.cli import write_efi_partition
-from devicetool.cli import write_gpt
 from devicetool.cli import write_grub_bios_partition
 from eprint import eprint
+from globalverbose import gvd
 from mounttool import block_special_path_is_mounted
 from mounttool import path_is_mounted
 from pathtool import write_line_to_file
 from portagetool import install_packages
-from timetool import get_timestamp
+from timestamptool import get_timestamp
 from warntool import warn
 
 # from devicetool import create_filesystem
@@ -67,7 +68,7 @@ def create_boot_device(
     partition_table: str,
     filesystem: str,
     force: bool,
-    verbose: bool | int | float = False,
+    verbose: bool = False,
 ):
     assert device_is_not_a_partition(
         device=device,
@@ -108,11 +109,10 @@ def create_boot_device(
         )
 
         ctx.invoke(
-            write_gpt,
+            write_device_label,
             device=device,
-            no_wipe=True,
+            label="gpt",
             force=force,
-            no_backup=False,
             verbose=verbose,
         )  # zfs does this
 
@@ -175,12 +175,14 @@ def cli(
     ctx,
     verbose_inf: bool,
     dict_output: bool,
-    verbose: bool | int | float = False,
+    verbose: bool = False,
 ):
-    tty, verbose = tv(
+    tty, verbose = tvicgvd(
         ctx=ctx,
         verbose=verbose,
         verbose_inf=verbose_inf,
+        ic=ic,
+        gvd=gvd,
     )
 
 
@@ -204,9 +206,9 @@ def write_boot_partition(
     *,
     device: Path,
     force: bool,
-    verbose: bool | int | float = False,
     verbose_inf: bool,
     dict_output: bool,
+    verbose: bool = False,
 ):
     ic("creating boot partition (for grub config, stage2, vmlinuz) on:", device)
     assert device_is_not_a_partition(
@@ -255,7 +257,7 @@ def make_hybrid_mbr(
     ctx,
     *,
     boot_device: Path,
-    verbose: bool | int | float = False,
+    verbose: bool = False,
     verbose_inf: bool,
     dict_output: bool,
 ):
@@ -310,7 +312,7 @@ def create_boot_device_for_existing_root(
     force: bool,
     verbose_inf: bool,
     dict_output: bool,
-    verbose: bool | int | float = False,
+    verbose: bool = False,
 ):
     if configure_kernel:
         _compile_kernel = True
@@ -415,6 +417,9 @@ def create_boot_device_for_existing_root(
 
     if _compile_kernel:
         kcompile(
+            fix=True,
+            warn_only=False,
+            symlink_config=False,
             configure=configure_kernel,
             configure_only=False,
             force=force,
@@ -562,12 +567,14 @@ def _install_grub(
     boot_device: Path,
     verbose_inf: bool,
     dict_output: bool,
-    verbose: bool | int | float = False,
+    verbose: bool = False,
 ):
-    tty, verbose = tv(
+    tty, verbose = tvicgvd(
         ctx=ctx,
         verbose=verbose,
         verbose_inf=verbose_inf,
+        ic=ic,
+        gvd=gvd,
     )
 
     install_grub(boot_device=boot_device)
