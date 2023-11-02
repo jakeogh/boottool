@@ -436,7 +436,7 @@ def install_grub(
     if not path_is_mounted(
         Path("/boot/efi"),
     ):
-        ic("/boot/efi not mounted. Exiting.")
+        icp("/boot/efi not mounted. Exiting.")
         sys.exit(1)
 
     sh.env_update()
