@@ -64,6 +64,122 @@ from warntool import warn
 signal(SIGPIPE, SIG_DFL)
 
 
+def install_grub(
+    boot_device: Path,
+):
+    if not path_is_mounted(
+        Path("/boot/efi"),
+    ):
+        icp("/boot/efi not mounted. Exiting.")
+        sys.exit(1)
+
+    sh.env_update()
+    # set +u # disable nounset        # line 22 has an unbound variable: user_id /etc/profile.d/java-config-2.sh
+    # source /etc/profile || exit 1
+
+    install_packages(
+        ["grub"],
+        force=False,
+    )
+
+    # if [[ "${root_filesystem}" == "zfs" ]];
+    # then
+    #    echo "GRUB_PRELOAD_MODULES=\"part_gpt part_msdos zfs\"" >> /etc/default/grub
+    #   #echo "GRUB_CMDLINE_LINUX_DEFAULT=\"boot=zfs root=ZFS=rpool/ROOT\"" >> /etc/default/grub
+    #   #echo "GRUB_CMDLINE_LINUX_DEFAULT=\"boot=zfs\"" >> /etc/default/grub
+    #   #echo "GRUB_DEVICE=\"ZFS=rpool/ROOT/gentoo\"" >> /etc/default/grub
+    #   # echo "GRUB_DEVICE=\"ZFS=${hostname}/ROOT/gentoo\"" >> /etc/default/grub #this was uncommented, disabled to not use hostname
+    # else
+    write_line_to_file(
+        path=Path("/etc/default/grub"),
+        line='GRUB_PRELOAD_MODULES="part_gpt part_msdos"' + "\n",
+        unique=True,
+    )
+
+    from devicetool import get_root_device
+
+    root_partition = get_root_device()
+    # root_partition = Path(sh.grub_probe("--target=device", "/").strip())
+    icp(root_partition)
+    assert root_partition.as_posix().startswith("/dev/")
+    # partition_uuid_command = sh.Command('/home/cfg/linux/hardware/disk/blkid/PARTUUID')
+    # partuuid = partition_uuid_command(root_partition, _err=sys.stderr, _out=sys.stdout)
+    partuuid = get_partuuid_for_partition(
+        root_partition,
+    )
+    ic("GRUB_DEVICE partuuid:", partuuid)
+
+    write_line_to_file(
+        path=Path("/etc/default/grub"),
+        line=f'GRUB_DEVICE="PARTUUID={partuuid}"' + "\n",
+        unique=True,
+    )
+
+    partuuid_root_device = get_partuuid_for_partition(partition=root_partition)
+
+    # partuuid_root_device_command = sh.Command(
+    #    "/home/cfg/linux/disk/blkid/PARTUUID_root_device"
+    # )
+    # partuuid_root_device = partuuid_root_device_command().strip()
+    icp(partuuid_root_device)
+
+    partuuid_root_device_fstab_line = (
+        "PARTUUID="
+        + str(partuuid_root_device)
+        + "\t/"
+        + "\text4"
+        + "\tnoatime"
+        + "\t0"
+        + "\t1"
+    )
+    write_line_to_file(
+        path=Path("/etc/fstab"),
+        line=partuuid_root_device_fstab_line + "\n",
+        unique=True,
+    )
+
+    write_line_to_file(
+        path=Path("/etc/default/grub"),
+        # line='GRUB_CMDLINE_LINUX="net.ifnames=0 rootflags=noatime intel_iommu=off"'
+        line='GRUB_CMDLINE_LINUX="net.ifnames=0 rootflags=noatime earlyprintk=vga"'
+        + "\n",
+        unique=True,
+    )
+
+    sh.ln("-sf", "/proc/self/mounts", "/etc/mtab")
+
+    sh.grub_install(
+        "--compress=no",
+        "--target=x86_64-efi",
+        "--efi-directory=/boot/efi",
+        "--boot-directory=/boot",
+        "--removable",
+        "--recheck",
+        "--no-rs-codes",
+        "--debug-image=linux",
+        "--debug",
+        boot_device,
+        _out=sys.stdout,
+        _err=sys.stderr,
+    )
+    sh.grub_install(
+        "--compress=no",
+        "--target=i386-pc",
+        "--boot-directory=/boot",
+        "--recheck",
+        "--no-rs-codes",
+        "--force",  # otherwise it complains about blocklists
+        boot_device,
+        _out=sys.stdout,
+        _err=sys.stderr,
+    )
+
+    sh.grub_mkconfig("-o", "/boot/grub/grub.cfg", _out=sys.stdout, _err=sys.stderr)
+
+    with open(Path("/install_status"), "a", encoding="utf8") as fh:
+        fh.write(get_timestamp() + sys.argv[0] + "complete" + "\n")
+
+
 def create_boot_device(
     ctx,
     *,
@@ -431,123 +547,6 @@ def create_boot_device_for_existing_root(
         )
 
     sh.grub_mkconfig("-o", "/boot/grub/grub.cfg", _out=sys.stdout, _err=sys.stderr)
-
-
-def install_grub(
-    boot_device: Path,
-):
-    if not path_is_mounted(
-        Path("/boot/efi"),
-    ):
-        icp("/boot/efi not mounted. Exiting.")
-        sys.exit(1)
-
-    sh.env_update()
-    # set +u # disable nounset        # line 22 has an unbound variable: user_id /etc/profile.d/java-config-2.sh
-    # source /etc/profile || exit 1
-
-    install_packages(
-        ["grub"],
-        force=False,
-    )
-
-    # if [[ "${root_filesystem}" == "zfs" ]];
-    # then
-    #    echo "GRUB_PRELOAD_MODULES=\"part_gpt part_msdos zfs\"" >> /etc/default/grub
-    #   #echo "GRUB_CMDLINE_LINUX_DEFAULT=\"boot=zfs root=ZFS=rpool/ROOT\"" >> /etc/default/grub
-    #   #echo "GRUB_CMDLINE_LINUX_DEFAULT=\"boot=zfs\"" >> /etc/default/grub
-    #   #echo "GRUB_DEVICE=\"ZFS=rpool/ROOT/gentoo\"" >> /etc/default/grub
-    #   # echo "GRUB_DEVICE=\"ZFS=${hostname}/ROOT/gentoo\"" >> /etc/default/grub #this was uncommented, disabled to not use hostname
-    # else
-    write_line_to_file(
-        path=Path("/etc/default/grub"),
-        line='GRUB_PRELOAD_MODULES="part_gpt part_msdos"' + "\n",
-        unique=True,
-    )
-
-    from devicetool import get_root_device
-
-    root_partition = get_root_device()
-    # root_partition = Path(sh.grub_probe("--target=device", "/").strip())
-    icp(root_partition)
-    assert root_partition.as_posix().startswith("/dev/")
-    # partition_uuid_command = sh.Command('/home/cfg/linux/hardware/disk/blkid/PARTUUID')
-    # partuuid = partition_uuid_command(root_partition, _err=sys.stderr, _out=sys.stdout)
-    partuuid = get_partuuid_for_partition(
-        root_partition,
-    )
-    ic("GRUB_DEVICE partuuid:", partuuid)
-
-    write_line_to_file(
-        path=Path("/etc/default/grub"),
-        line=f'GRUB_DEVICE="PARTUUID={partuuid}"' + "\n",
-        unique=True,
-    )
-
-    partuuid_root_device = get_partuuid_for_partition(partition=root_partition)
-
-    # partuuid_root_device_command = sh.Command(
-    #    "/home/cfg/linux/disk/blkid/PARTUUID_root_device"
-    # )
-    # partuuid_root_device = partuuid_root_device_command().strip()
-    icp(partuuid_root_device)
-
-    partuuid_root_device_fstab_line = (
-        "PARTUUID="
-        + str(partuuid_root_device)
-        + "\t/"
-        + "\text4"
-        + "\tnoatime"
-        + "\t0"
-        + "\t1"
-    )
-    write_line_to_file(
-        path=Path("/etc/fstab"),
-        line=partuuid_root_device_fstab_line + "\n",
-        unique=True,
-    )
-
-    # grep -E "^GRUB_CMDLINE_LINUX=\"net.ifnames=0 rootflags=noatime irqpoll\"" /etc/default/grub || { echo "GRUB_CMDLINE_LINUX=\"net.ifnames=0 rootflags=noatime irqpoll\"" >> /etc/default/grub ; }
-    write_line_to_file(
-        path=Path("/etc/default/grub"),
-        # line='GRUB_CMDLINE_LINUX="net.ifnames=0 rootflags=noatime intel_iommu=off"'
-        line='GRUB_CMDLINE_LINUX="net.ifnames=0 rootflags=noatime earlyprintk=vga"'
-        + "\n",
-        unique=True,
-    )
-
-    sh.ln("-sf", "/proc/self/mounts", "/etc/mtab")
-
-    sh.grub_install(
-        "--compress=no",
-        "--target=x86_64-efi",
-        "--efi-directory=/boot/efi",
-        "--boot-directory=/boot",
-        "--removable",
-        "--recheck",
-        "--no-rs-codes",
-        "--debug-image=linux",
-        "--debug",
-        boot_device,
-        _out=sys.stdout,
-        _err=sys.stderr,
-    )
-    sh.grub_install(
-        "--compress=no",
-        "--target=i386-pc",
-        "--boot-directory=/boot",
-        "--recheck",
-        "--no-rs-codes",
-        "--force",  # otherwise it complains about blocklists
-        boot_device,
-        _out=sys.stdout,
-        _err=sys.stderr,
-    )
-
-    sh.grub_mkconfig("-o", "/boot/grub/grub.cfg", _out=sys.stdout, _err=sys.stderr)
-
-    with open(Path("/install_status"), "a", encoding="utf8") as fh:
-        fh.write(get_timestamp() + sys.argv[0] + "complete" + "\n")
 
 
 @cli.command("install-grub")
