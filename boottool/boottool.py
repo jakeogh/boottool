@@ -64,6 +64,14 @@ from warntool import warn
 signal(SIGPIPE, SIG_DFL)
 
 
+def generate_grub_config(path: Path, replace: bool) -> None:
+    if not replace:
+        if path.exists():
+            raise FileExistsError(path)
+
+    sh.grub_mkconfig("-o", path.as_posix(), _out=sys.stdout, _err=sys.stderr)
+
+
 def install_grub(
     boot_device: Path,
 ):
@@ -174,7 +182,7 @@ def install_grub(
         _err=sys.stderr,
     )
 
-    sh.grub_mkconfig("-o", "/boot/grub/grub.cfg", _out=sys.stdout, _err=sys.stderr)
+    generate_grub_config(path=Path("/boot/grub/grub.cfg"), replace=True)
 
     with open(Path("/install_status"), "a", encoding="utf8") as fh:
         fh.write(get_timestamp() + sys.argv[0] + "complete" + "\n")
@@ -546,7 +554,7 @@ def create_boot_device_for_existing_root(
             verbose=verbose,
         )
 
-    sh.grub_mkconfig("-o", "/boot/grub/grub.cfg", _out=sys.stdout, _err=sys.stderr)
+    generate_grub_config(path=Path("/boot/grub/grub.cfg"), replace=True)
 
 
 @cli.command("install-grub")
@@ -581,3 +589,36 @@ def _install_grub(
     )
 
     install_grub(boot_device=boot_device)
+
+
+@click.argument(
+    "path",
+    type=click.Path(
+        exists=True,
+        dir_okay=False,
+        file_okay=True,
+        allow_dash=False,
+        path_type=Path,
+    ),
+    nargs=1,
+    required=True,
+)
+@click_add_options(click_global_options)
+@click.pass_context
+def _regenerate_grub_config(
+    ctx,
+    *,
+    boot_device: Path,
+    verbose_inf: bool,
+    dict_output: bool,
+    verbose: bool = False,
+):
+    tty, verbose = tvicgvd(
+        ctx=ctx,
+        verbose=verbose,
+        verbose_inf=verbose_inf,
+        ic=ic,
+        gvd=gvd,
+    )
+
+    generate_grub_config(path=Path("/boot/grub/grub.cfg"), replace=True)
