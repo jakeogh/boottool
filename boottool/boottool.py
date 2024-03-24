@@ -199,7 +199,6 @@ def create_boot_device(
 ):
     assert device_is_not_a_partition(
         device=device,
-        verbose=verbose,
     )
     assert isinstance(device, Path)
 
@@ -212,14 +211,10 @@ def create_boot_device(
     assert path_is_block_special(device)
     assert not block_special_path_is_mounted(
         device,
-        verbose=verbose,
     )
 
     if not force:
-        warn(
-            (device,),
-            verbose=verbose,
-        )
+        warn((device,))
 
     # dont do this here, want to be able to let zfs make
     # the gpt and it's partitions before making bios_grub and EFI
@@ -330,6 +325,7 @@ def cli(
 @click_add_options(click_global_options)
 @click.pass_context
 def write_boot_partition(
+    ctx,
     *,
     device: Path,
     force: bool,
@@ -337,6 +333,13 @@ def write_boot_partition(
     dict_output: bool,
     verbose: bool = False,
 ):
+    tty, verbose = tvicgvd(
+        ctx=ctx,
+        verbose=verbose,
+        verbose_inf=verbose_inf,
+        ic=ic,
+        gvd=gvd,
+    )
     ic("creating boot partition (for grub config, stage2, vmlinuz) on:", device)
     assert device_is_not_a_partition(
         device=device,
@@ -388,6 +391,13 @@ def make_hybrid_mbr(
     verbose_inf: bool,
     dict_output: bool,
 ):
+    tty, verbose = tvicgvd(
+        ctx=ctx,
+        verbose=verbose,
+        verbose_inf=verbose_inf,
+        ic=ic,
+        gvd=gvd,
+    )
     if not root_user():
         ic("You must be root.")
         sys.exit(1)
@@ -441,10 +451,16 @@ def create_boot_device_for_existing_root(
     dict_output: bool,
     verbose: bool = False,
 ):
+    tty, verbose = tvicgvd(
+        ctx=ctx,
+        verbose=verbose,
+        verbose_inf=verbose_inf,
+        ic=ic,
+        gvd=gvd,
+    )
     if configure_kernel:
         _compile_kernel = True
 
-    assert False  ## needs to ctx.invoke(install_brub)
     if not root_user():
         ic("You must be root.")
         sys.exit(1)
@@ -453,19 +469,16 @@ def create_boot_device_for_existing_root(
     ic(mount_path_boot)
     assert not path_is_mounted(
         mount_path_boot,
-        verbose=verbose,
     )
 
     mount_path_boot_efi = mount_path_boot / Path("efi")
     ic(mount_path_boot_efi)
     assert not path_is_mounted(
         mount_path_boot_efi,
-        verbose=verbose,
     )
 
     assert device_is_not_a_partition(
         device=boot_device,
-        verbose=verbose,
     )
 
     ic(
@@ -477,12 +490,10 @@ def create_boot_device_for_existing_root(
     assert path_is_block_special(boot_device)
     assert not block_special_path_is_mounted(
         boot_device,
-        verbose=verbose,
     )
     if not force:
         warn(
             (boot_device,),
-            verbose=verbose,
         )
     create_boot_device(
         ctx,
@@ -490,7 +501,6 @@ def create_boot_device_for_existing_root(
         partition_table=boot_device_partition_table,
         filesystem=boot_filesystem,
         force=True,
-        verbose=verbose,
     )
     ctx.invoke(
         write_boot_partition,
@@ -506,19 +516,15 @@ def create_boot_device_for_existing_root(
     boot_partition_path = add_partition_number_to_device(
         device=boot_device,
         partition_number=3,
-        verbose=verbose,
     )
-    assert not path_is_mounted(
-        mount_path_boot,
-        verbose=verbose,
-    )
+    assert not path_is_mounted(mount_path_boot)
     sh.mount(
-        boot_partition_path, str(mount_path_boot), _out=sys.stdout, _err=sys.stderr
+        boot_partition_path,
+        str(mount_path_boot),
+        _out=sys.stdout,
+        _err=sys.stderr,
     )
-    assert path_is_mounted(
-        mount_path_boot,
-        verbose=verbose,
-    )
+    assert path_is_mounted(mount_path_boot)
 
     os.makedirs(mount_path_boot_efi, exist_ok=True)
 
@@ -527,20 +533,13 @@ def create_boot_device_for_existing_root(
         partition_number=2,
         verbose=verbose,
     )
-    assert not path_is_mounted(
-        mount_path_boot_efi,
-        verbose=verbose,
-    )
+    assert not path_is_mounted(mount_path_boot_efi)
     sh.mount(
         efi_partition_path, str(mount_path_boot_efi), _out=sys.stdout, _err=sys.stderr
     )
-    assert path_is_mounted(
-        mount_path_boot_efi,
-        verbose=verbose,
-    )
+    assert path_is_mounted(mount_path_boot_efi)
 
-    install_grub_command = sh.Command("post_chroot_install_grub.sh")
-    install_grub_command(boot_device, _out=sys.stdout, _err=sys.stderr)
+    install_grub(boot_device)
 
     if _compile_kernel:
         kcompile(
@@ -551,7 +550,6 @@ def create_boot_device_for_existing_root(
             configure_only=False,
             force=force,
             no_check_boot=True,
-            verbose=verbose,
         )
 
     generate_grub_config(path=Path("/boot/grub/grub.cfg"), replace=True)
