@@ -419,7 +419,7 @@ def make_hybrid_mbr(
 
 
 @cli.command()
-@click.option("--boot-device", is_flag=False, required=True)
+@click.option("--boot-device", type=click.Path(path_type=Path), required=True)
 @click.option(
     "--boot-device-partition-table",
     is_flag=False,
@@ -441,8 +441,8 @@ def make_hybrid_mbr(
 @click.pass_context
 def create_boot_device_for_existing_root(
     ctx,
-    boot_device,
-    boot_device_partition_table,
+    boot_device: Path,
+    boot_device_partition_table: str,
     boot_filesystem,
     _compile_kernel: bool,
     configure_kernel: bool,
