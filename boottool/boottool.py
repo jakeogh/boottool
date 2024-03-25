@@ -41,6 +41,7 @@ from click_auto_help import AHGroup
 from clicktool import click_add_options
 from clicktool import click_global_options
 from clicktool import tvicgvd
+from compile_kernel.compile_kernel import install_kernel
 from compile_kernel.compile_kernel import kcompile
 from devicelabeltool import write as write_device_label
 from devicetool import add_partition_number_to_device
@@ -557,6 +558,8 @@ def create_boot_device_for_existing_root(
             force=force,
             no_check_boot=True,
         )
+    else:
+        install_kernel()
 
     generate_grub_config(path=Path("/boot/grub/grub.cfg"), replace=True)
 
