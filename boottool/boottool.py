@@ -512,8 +512,11 @@ def create_boot_device_for_existing_root(
         verbose=verbose,
     )
 
-    hybrid_mbr_command = sh.Command("gpart_make_hybrid_mbr.sh")
-    hybrid_mbr_command(boot_device, _out=sys.stdout, _err=sys.stderr)
+    ctx.invoke(
+        make_hybrid_mbr,
+        device=boot_device,
+        verbose=verbose,
+    )
 
     os.makedirs(mount_path_boot, exist_ok=True)
     boot_partition_path = add_partition_number_to_device(
