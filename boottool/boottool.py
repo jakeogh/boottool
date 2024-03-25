@@ -368,13 +368,16 @@ def write_boot_partition(
         "-a",
         "optimal",
         str(device),
-        "--script -- mkpart primary " + str(start) + " " + str(end),
-        _out=sys.stdout,
-        _err=sys.stderr,
+        "--script",
+        "--",
+        "mkpart",
+        "primary",
+        str(start),
+        str(end),
+        # _out=sys.stdout,
+        # _err=sys.stderr,
     )
-    sh.parted(
-        device, "--script -- name " + str(partition_number) + " bootfs", verbose=True
-    )
+    sh.parted(device, "--script", "--", "name", str(partition_number), "bootfs")
     mkfs_command = sh.Command("mkfs.ext4")
     mkfs_command(partition, _out=sys.stdout, _err=sys.stderr)
 
