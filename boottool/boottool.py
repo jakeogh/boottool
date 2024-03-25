@@ -514,7 +514,7 @@ def create_boot_device_for_existing_root(
 
     ctx.invoke(
         make_hybrid_mbr,
-        device=boot_device,
+        boot_device=boot_device,
         verbose=verbose,
     )
 
