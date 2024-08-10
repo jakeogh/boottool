@@ -554,7 +554,6 @@ def create_boot_device_for_existing_root(
             warn_only=False,
             symlink_config=False,
             configure=configure_kernel,
-            configure=False,
             force=force,
             no_check_boot=True,
         )
