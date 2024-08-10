@@ -256,7 +256,7 @@ def create_boot_device(
         device=device,
         force=True,
         start="48s",
-        end="1023s",
+        end="2047s",
         partition_number=1,
         verbose=verbose,
     )
@@ -266,7 +266,7 @@ def create_boot_device(
         write_efi_partition,
         device=device,
         force=True,
-        start="1024s",
+        start="2048s",
         end="18047s",
         partition_number=2,
         verbose=verbose,
@@ -554,7 +554,7 @@ def create_boot_device_for_existing_root(
             warn_only=False,
             symlink_config=False,
             configure=configure_kernel,
-            configure_only=False,
+            configure=False,
             force=force,
             no_check_boot=True,
         )
