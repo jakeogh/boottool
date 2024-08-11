@@ -187,10 +187,12 @@ def install_grub(
         "--boot-directory=/boot",
         "--recheck",
         "--no-rs-codes",
+        "--debug",
         # "--force",  # otherwise it complains about blocklists
     )
     if debug_grub:
         # basically never boots because it's so slow
+        # _grub_command = _grub_command.bake("--debug-image=all")
         _grub_command = _grub_command.bake("--debug-image=all")
 
     _grub_command(
@@ -443,21 +445,20 @@ def make_hybrid_mbr(
 @click.option(
     "--boot-device-partition-table",
     is_flag=False,
-    required=False,
     type=click.Choice(["gpt"]),
     default="gpt",
 )
 @click.option(
     "--boot-filesystem",
     is_flag=False,
-    required=False,
     type=click.Choice(["ext4"]),
     default="ext4",
 )
-@click.option("--force", is_flag=True, required=False)
-@click.option("--skip-uefi", is_flag=True, required=False)
-@click.option("--compile-kernel", "_compile_kernel", is_flag=True, required=False)
-@click.option("--configure-kernel", is_flag=True, required=False)
+@click.option("--force", is_flag=True)
+@click.option("--skip-uefi", is_flag=True)
+@click.option("--debug-grub", is_flag=True)
+@click.option("--compile-kernel", "_compile_kernel", is_flag=True)
+@click.option("--configure-kernel", is_flag=True)
 @click_add_options(click_global_options)
 @click.pass_context
 def create_boot_device_for_existing_root(
@@ -468,6 +469,7 @@ def create_boot_device_for_existing_root(
     _compile_kernel: bool,
     configure_kernel: bool,
     force: bool,
+    debug_grub: bool,
     verbose_inf: bool,
     dict_output: bool,
     skip_uefi: bool,
@@ -564,7 +566,7 @@ def create_boot_device_for_existing_root(
     )
     assert path_is_mounted(mount_path_boot_efi)
 
-    install_grub(boot_device, skip_uefi=skip_uefi, debug_grub=False)
+    install_grub(boot_device, skip_uefi=skip_uefi, debug_grub=debug_grub)
 
     if _compile_kernel:
         kcompile(
@@ -595,6 +597,7 @@ def create_boot_device_for_existing_root(
     required=True,
 )
 @click.option("--skip-uefi", is_flag=True, required=False)
+@click.option("--debug-grub", is_flag=True, required=False)
 @click_add_options(click_global_options)
 @click.pass_context
 def _install_grub(
@@ -602,6 +605,7 @@ def _install_grub(
     *,
     boot_device: Path,
     skip_uefi: bool,
+    debug_grub: bool,
     verbose_inf: bool,
     dict_output: bool,
     verbose: bool = False,
@@ -617,7 +621,7 @@ def _install_grub(
     install_grub(
         boot_device=boot_device,
         skip_uefi=skip_uefi,
-        debug_grub=False,
+        debug_grub=debug_grub,
     )
 
 
