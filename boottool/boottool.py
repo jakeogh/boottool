@@ -193,9 +193,9 @@ def install_grub(
     if debug_grub:
         # basically never boots because it's so slow
         # _grub_command = _grub_command.bake("--debug-image=all")
-        # # disabled: relocator,
+        # # disabled: relocator,scripting
         _grub_command = _grub_command.bake(
-            "--debug-image=acpi,affs,ahci,appleload,arcdisk,archelp,ata,atkeyb,biosdisk,bsd,btrfs,cache,cbfs,chain,crypt,cryptodisk,datetime,devalias,disk,diskfilter,dl,dns,drivemap,efi,efidisk,efiemu,ehci,elf,exfat,expand,fat,fb,fdt,fixvideo,font,fs,geli,gpt,hostdisk,init,jpeg,keystatus,lexer,linux,loader,luks,memdisk,mm,mmap,modules,multiboot_loader,nativedisk,net,ohci,partition,pata,play,reiserfs_tree,scripting,scsi,serial,smbios,syslinux,tftp,tga,ubootdisk,uhci,usb,usb_keyboard,usbms,video,xen,xen_loader,xfs,xnu,zfs"
+            "--debug-image=acpi,affs,ahci,appleload,arcdisk,archelp,ata,atkeyb,biosdisk,bsd,btrfs,cache,cbfs,chain,crypt,cryptodisk,datetime,devalias,disk,diskfilter,dl,dns,drivemap,efi,efidisk,efiemu,ehci,elf,exfat,expand,fat,fb,fdt,fixvideo,font,fs,geli,gpt,hostdisk,init,jpeg,keystatus,lexer,linux,loader,luks,memdisk,mm,mmap,modules,multiboot_loader,nativedisk,net,ohci,partition,pata,play,reiserfs_tree,scsi,serial,smbios,syslinux,tftp,tga,ubootdisk,uhci,usb,usb_keyboard,usbms,video,xen,xen_loader,xfs,xnu,zfs"
         )
 
     _grub_command(
