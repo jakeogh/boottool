@@ -159,6 +159,7 @@ def install_grub(
 
     sh.grub_install(
         "--compress=no",
+        "--core-compress=no",
         "--target=x86_64-efi",
         "--efi-directory=/boot/efi",
         "--boot-directory=/boot",
@@ -173,12 +174,13 @@ def install_grub(
     )
     sh.grub_install(
         "--compress=no",
+        "--core-compress=no",
         "--target=i386-pc",
         "--boot-directory=/boot",
         "--recheck",
         "--no-rs-codes",
         "--debug-image=all",
-        "--force",  # otherwise it complains about blocklists
+        # "--force",  # otherwise it complains about blocklists
         boot_device,
         _out=sys.stdout,
         _err=sys.stderr,
