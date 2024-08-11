@@ -75,12 +75,14 @@ def generate_grub_config(path: Path, replace: bool) -> None:
 
 def install_grub(
     boot_device: Path,
+    skip_uefi: bool,
 ):
-    if not path_is_mounted(
-        Path("/boot/efi"),
-    ):
-        icp("/boot/efi not mounted. Exiting.")
-        sys.exit(1)
+    if not skip_uefi:
+        if not path_is_mounted(
+            Path("/boot/efi"),
+        ):
+            icp("/boot/efi not mounted. Exiting.")
+            sys.exit(1)
 
     sh.env_update()
     # set +u # disable nounset        # line 22 has an unbound variable: user_id /etc/profile.d/java-config-2.sh
@@ -157,21 +159,22 @@ def install_grub(
 
     sh.ln("-sf", "/proc/self/mounts", "/etc/mtab")
 
-    sh.grub_install(
-        "--compress=no",
-        "--core-compress=no",
-        "--target=x86_64-efi",
-        "--efi-directory=/boot/efi",
-        "--boot-directory=/boot",
-        "--removable",
-        "--recheck",
-        "--no-rs-codes",
-        "--debug-image=linux",
-        "--debug",
-        boot_device,
-        _out=sys.stdout,
-        _err=sys.stderr,
-    )
+    if not skip_uefi:
+        sh.grub_install(
+            "--compress=no",
+            "--core-compress=no",
+            "--target=x86_64-efi",
+            "--efi-directory=/boot/efi",
+            "--boot-directory=/boot",
+            "--removable",
+            "--recheck",
+            "--no-rs-codes",
+            "--debug-image=linux",
+            "--debug",
+            boot_device,
+            _out=sys.stdout,
+            _err=sys.stderr,
+        )
     sh.grub_install(
         "--compress=no",
         "--core-compress=no",
@@ -442,6 +445,7 @@ def make_hybrid_mbr(
     default="ext4",
 )
 @click.option("--force", is_flag=True, required=False)
+@click.option("--skip-uefi", is_flag=True, required=False)
 @click.option("--compile-kernel", "_compile_kernel", is_flag=True, required=False)
 @click.option("--configure-kernel", is_flag=True, required=False)
 @click_add_options(click_global_options)
@@ -456,6 +460,7 @@ def create_boot_device_for_existing_root(
     force: bool,
     verbose_inf: bool,
     dict_output: bool,
+    skip_uefi: bool,
     verbose: bool = False,
 ):
     tty, verbose = tvicgvd(
@@ -549,7 +554,7 @@ def create_boot_device_for_existing_root(
     )
     assert path_is_mounted(mount_path_boot_efi)
 
-    install_grub(boot_device)
+    install_grub(boot_device, skip_uefi=skip_uefi)
 
     if _compile_kernel:
         kcompile(
@@ -579,12 +584,14 @@ def create_boot_device_for_existing_root(
     nargs=1,
     required=True,
 )
+@click.option("--skip-uefi", is_flag=True, required=False)
 @click_add_options(click_global_options)
 @click.pass_context
 def _install_grub(
     ctx,
     *,
     boot_device: Path,
+    skip_uefi: bool,
     verbose_inf: bool,
     dict_output: bool,
     verbose: bool = False,
@@ -597,7 +604,10 @@ def _install_grub(
         gvd=gvd,
     )
 
-    install_grub(boot_device=boot_device)
+    install_grub(
+        boot_device=boot_device,
+        skip_uefi=skip_uefi,
+    )
 
 
 @click.argument(
