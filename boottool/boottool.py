@@ -91,6 +91,7 @@ def install_grub(
     install_packages(
         ["grub"],
         force=False,
+        upgrade_only=True,
     )
 
     # if [[ "${root_filesystem}" == "zfs" ]];
