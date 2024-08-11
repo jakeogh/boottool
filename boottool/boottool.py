@@ -162,7 +162,7 @@ def install_grub(
     if not skip_uefi:
         sh.grub_install(
             "--compress=no",
-            "--core-compress=no",
+            "--core-compress=none",
             "--target=x86_64-efi",
             "--efi-directory=/boot/efi",
             "--boot-directory=/boot",
@@ -177,7 +177,7 @@ def install_grub(
         )
     sh.grub_install(
         "--compress=no",
-        "--core-compress=no",
+        "--core-compress=none",
         "--target=i386-pc",
         "--boot-directory=/boot",
         "--recheck",
