@@ -76,6 +76,7 @@ def generate_grub_config(path: Path, replace: bool) -> None:
 def install_grub(
     boot_device: Path,
     skip_uefi: bool,
+    debug_grub: bool,
 ):
     if not skip_uefi:
         if not path_is_mounted(
@@ -161,7 +162,7 @@ def install_grub(
     sh.ln("-sf", "/proc/self/mounts", "/etc/mtab")
 
     if not skip_uefi:
-        sh.grub_install(
+        _grub_command = sh.grub_install.bake(
             "--compress=no",
             "--core-compress=none",
             "--target=x86_64-efi",
@@ -172,19 +173,26 @@ def install_grub(
             "--no-rs-codes",
             "--debug-image=linux",
             "--debug",
+        )
+        _grub_command(
             boot_device,
             _out=sys.stdout,
             _err=sys.stderr,
         )
-    sh.grub_install(
+
+    _grub_command = sh.grub_install.bake(
         "--compress=no",
         "--core-compress=none",
         "--target=i386-pc",
         "--boot-directory=/boot",
         "--recheck",
         "--no-rs-codes",
-        "--debug-image=all",
         # "--force",  # otherwise it complains about blocklists
+    )
+    if debug_grub:
+        _grub_command = _grub_command.bake("--debug-image=all")
+
+    _grub_command(
         boot_device,
         _out=sys.stdout,
         _err=sys.stderr,
@@ -555,7 +563,7 @@ def create_boot_device_for_existing_root(
     )
     assert path_is_mounted(mount_path_boot_efi)
 
-    install_grub(boot_device, skip_uefi=skip_uefi)
+    install_grub(boot_device, skip_uefi=skip_uefi, debug_grub=False)
 
     if _compile_kernel:
         kcompile(
@@ -608,6 +616,7 @@ def _install_grub(
     install_grub(
         boot_device=boot_device,
         skip_uefi=skip_uefi,
+        debug_grub=False,
     )
 
 
