@@ -190,6 +190,7 @@ def install_grub(
         # "--force",  # otherwise it complains about blocklists
     )
     if debug_grub:
+        # basically never boots because it's so slow
         _grub_command = _grub_command.bake("--debug-image=all")
 
     _grub_command(
