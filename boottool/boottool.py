@@ -177,6 +177,7 @@ def install_grub(
         "--boot-directory=/boot",
         "--recheck",
         "--no-rs-codes",
+        "--debug-image=all",
         "--force",  # otherwise it complains about blocklists
         boot_device,
         _out=sys.stdout,
