@@ -188,7 +188,7 @@ def install_grub(
         "--recheck",
         "--no-rs-codes",
         "--debug",
-        # "--force",  # otherwise it complains about blocklists
+        "--force",  # otherwise it complains about blocklists... sometimes
     )
     if debug_grub:
         # basically never boots because it's so slow
