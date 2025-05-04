@@ -41,8 +41,8 @@ from click_auto_help import AHGroup
 from clicktool import click_add_options
 from clicktool import click_global_options
 from clicktool import tvicgvd
+from compile_kernel.compile_kernel import compile_and_install_kernel
 from compile_kernel.compile_kernel import install_compiled_kernel
-from compile_kernel.compile_kernel import kcompile
 from devicelabeltool import write as write_device_label
 from devicetool import add_partition_number_to_device
 from devicetool import device_is_not_a_partition
@@ -100,7 +100,7 @@ def install_grub(
     #   #echo "GRUB_CMDLINE_LINUX_DEFAULT=\"boot=zfs\"" >> /etc/default/grub
     #   #echo "GRUB_DEVICE=\"ZFS=rpool/ROOT/gentoo\"" >> /etc/default/grub
     #   # echo "GRUB_DEVICE=\"ZFS=${hostname}/ROOT/gentoo\"" >> /etc/default/grub #this was uncommented, disabled to not use hostname
-    # else
+    #  else
     write_line_to_file(
         path=Path("/etc/default/grub"),
         line='GRUB_PRELOAD_MODULES="part_gpt part_msdos"' + "\n",
@@ -567,7 +567,7 @@ def create_boot_device_for_existing_root(
     install_grub(boot_device, skip_uefi=skip_uefi, debug_grub=debug_grub)
 
     if _compile_kernel:
-        kcompile(
+        compile_and_install_kernel(
             fix=True,
             warn_only=False,
             symlink_config=False,
