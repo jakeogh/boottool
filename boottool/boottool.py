@@ -60,8 +60,6 @@ from portagetool import install_packages
 from timestamptool import get_timestamp
 from warntool import warn
 
-# from devicetool import create_filesystem
-
 signal(SIGPIPE, SIG_DFL)
 
 
@@ -230,13 +228,13 @@ def create_boot_device(
         "(" + partition_table + ")",
         "(" + filesystem + ")",
     )
-    assert path_is_block_special(device)
+    assert path_is_block_special(device, symlink_ok=True)
     assert not block_special_path_is_mounted(
         device,
     )
 
     if not force:
-        warn((device,))
+        warn((device,), symlink_ok=True)
 
     # dont do this here, want to be able to let zfs make
     # the gpt and it's partitions before making bios_grub and EFI
@@ -365,23 +363,22 @@ def write_boot_partition(
     ic("creating boot partition (for grub config, stage2, vmlinuz) on:", device)
     assert device_is_not_a_partition(
         device=device,
-        verbose=verbose,
     )
-    assert path_is_block_special(device)
+    assert path_is_block_special(device, symlink_ok=True)
     assert not block_special_path_is_mounted(
         device,
-        verbose=verbose,
     )
 
     if not force:
         warn(
             (device,),
-            verbose=verbose,
+            symlink_ok=True,
         )
 
     partition_number = 3
     partition = add_partition_number_to_device(
-        device=device, partition_number=partition_number, verbose=verbose
+        device=device,
+        partition_number=partition_number,
     )
     start = "100MiB"
     end = "400MiB"
@@ -427,7 +424,7 @@ def make_hybrid_mbr(
         ic("You must be root.")
         sys.exit(1)
 
-    assert path_is_block_special(boot_device)
+    assert path_is_block_special(boot_device, symlink_ok=True)
 
     with resources.path(
         "boottool", "gpart_make_hybrid_mbr.sh"
@@ -514,11 +511,12 @@ def create_boot_device_for_existing_root(
         boot_device_partition_table,
         boot_filesystem,
     )
-    assert path_is_block_special(boot_device)
+    assert path_is_block_special(boot_device, symlink_ok=True)
     assert not block_special_path_is_mounted(boot_device)
     if not force:
         warn(
             (boot_device,),
+            symlink_ok=True,
         )
     create_boot_device(
         ctx,
@@ -559,7 +557,6 @@ def create_boot_device_for_existing_root(
     efi_partition_path = add_partition_number_to_device(
         device=boot_device,
         partition_number=2,
-        verbose=verbose,
     )
     assert not path_is_mounted(mount_path_boot_efi)
     sh.mount(
