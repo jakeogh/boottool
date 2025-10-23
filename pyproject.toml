@@ -1,0 +1,59 @@
+[build-system]
+requires = [
+    "setuptools>=61.0",
+    "tomlkit",
+]
+build-backend = "pep508_url_version_backend"
+backend-path = [
+    ".",
+]
+
+[project]
+name = "boottool"
+version = "1!0.0.1761251778"
+description = "Manages boot configuration"
+authors = [
+    { name = "Justin Keogh", email = "github.com@v6y.net" },
+]
+license = "ISC"
+dependencies = []
+requires-python = ">=3.11"
+
+[project.urls]
+Homepage = "https://github.com/jakeogh/boottool"
+
+[project.scripts]
+boottool = "boottool.boottool:cli"
+
+[tool.setuptools]
+include-package-data = true
+zip-safe = false
+
+[tool.setuptools.package-data]
+boottool = [
+    "py.typed",
+]
+
+[tool.pep508-url-version-backend]
+dependencies-indexed = ["asserttool>=1!0.0.1761250315", "click-auto-help>=0.0.1761041641", "clicktool>=0.0.1761033403", "eprint>=0.0.1761027667", "globalverbose>=0.0.1761031290", "pathtool>=0.0.1760910107", "sh", "timestamptool>=1!0.0.1761251768", "warntool>=0.0.1760910085"]
+dependencies-git = [
+    "asserttool @ git+https://git@github.com/jakeogh/asserttool",
+    "click-auto-help @ git+https://git@github.com/jakeogh/click-auto-help",
+    "clicktool @ git+https://git@github.com/jakeogh/clicktool",
+    "compile-kernel @ git+https://git@github.com/jakeogh/compile-kernel",
+    "devicelabeltool @ git+https://git@github.com/jakeogh/devicelabeltool",
+    "devicetool @ git+https://git@github.com/jakeogh/devicetool",
+    "eprint @ git+https://git@github.com/jakeogh/eprint",
+    "globalverbose @ git+https://git@github.com/jakeogh/globalverbose",
+    "mounttool @ git+https://git@github.com/jakeogh/mounttool",
+    "pathtool @ git+https://git@github.com/jakeogh/pathtool",
+    "portagetool @ git+https://git@github.com/jakeogh/portagetool",
+    "hs @ git+https://git@github.com/jakeogh/hs",
+    "sh",
+    "timestamptool @ git+https://git@github.com/jakeogh/timestamptool",
+    "warntool @ git+https://git@github.com/jakeogh/warntool",
+]
+index-urls = [
+    "jakeogh.github.io",
+    "pip-index",
+]
