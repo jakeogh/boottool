@@ -10,7 +10,7 @@ backend-path = [
 
 [project]
 name = "boottool"
-version = "1!0.0.1761251796"
+version = "1!0.0.1761251904"
 description = "Manages boot configuration"
 authors = [
     { name = "Justin Keogh", email = "github.com@v6y.net" },
@@ -35,7 +35,7 @@ boottool = [
 ]
 
 [tool.pep508-url-version-backend]
-dependencies-indexed = ["asserttool>=1!0.0.1761250315", "click-auto-help>=0.0.1761041641", "clicktool>=0.0.1761033403", "eprint>=0.0.1761027667", "globalverbose>=0.0.1761031290", "pathtool>=0.0.1760910107", "sh", "timestamptool>=1!0.0.1761251768", "warntool>=0.0.1760910085"]
+dependencies-indexed = ["asserttool>=1!0.0.1761250315", "click-auto-help>=0.0.1761041641", "clicktool>=0.0.1761033403", "eprint>=0.0.1761027667", "globalverbose>=0.0.1761031290", "pathtool>=0.0.1760910107", "timestamptool>=1!0.0.1761251768", "warntool>=0.0.1760910085"]
 dependencies-git = [
     "asserttool @ git+https://git@github.com/jakeogh/asserttool",
     "click-auto-help @ git+https://git@github.com/jakeogh/click-auto-help",
@@ -49,7 +49,6 @@ dependencies-git = [
     "pathtool @ git+https://git@github.com/jakeogh/pathtool",
     "portagetool @ git+https://git@github.com/jakeogh/portagetool",
     "hs @ git+https://git@github.com/jakeogh/hs",
-    "sh",
     "timestamptool @ git+https://git@github.com/jakeogh/timestamptool",
     "warntool @ git+https://git@github.com/jakeogh/warntool",
 ]
