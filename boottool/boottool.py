@@ -31,10 +31,10 @@ from devicetool.cli import destroy_block_device_head_and_tail
 from devicetool.cli import write_efi_partition
 from devicetool.cli import write_grub_bios_partition
 from eprint import eprint
+from filetool import ensure_line_in_config_file
 from globalverbose import gvd
 from mounttool import block_special_path_is_mounted
 from mounttool import path_is_mounted
-from pathtool import write_line_to_file
 from portagetool import install_packages
 from timestamptool import get_timestamp
 from warntool import warn
@@ -85,10 +85,9 @@ def install_grub(
     #   #echo "GRUB_DEVICE=\"ZFS=rpool/ROOT/gentoo\"" >> /etc/default/grub
     #   # echo "GRUB_DEVICE=\"ZFS=${hostname}/ROOT/gentoo\"" >> /etc/default/grub #this was uncommented, disabled to not use hostname
     #  else
-    write_line_to_file(
+    ensure_line_in_config_file(
         path=Path("/etc/default/grub"),
-        line='GRUB_PRELOAD_MODULES="part_gpt part_msdos"' + "\n",
-        unique=True,
+        line='GRUB_PRELOAD_MODULES="part_gpt part_msdos"',
     )
 
     from devicetool import get_root_device
@@ -104,10 +103,9 @@ def install_grub(
     )
     ic("GRUB_DEVICE partuuid:", partuuid)
 
-    write_line_to_file(
+    ensure_line_in_config_file(
         path=Path("/etc/default/grub"),
-        line=f'GRUB_DEVICE="PARTUUID={partuuid}"' + "\n",
-        unique=True,
+        line=f'GRUB_DEVICE="PARTUUID={partuuid}"',
     )
 
     partuuid_root_device = get_partuuid_for_partition(partition=root_partition)
@@ -127,18 +125,15 @@ def install_grub(
         + "\t0"
         + "\t1"
     )
-    write_line_to_file(
+    ensure_line_in_config_file(
         path=Path("/etc/fstab"),
-        line=partuuid_root_device_fstab_line + "\n",
-        unique=True,
+        line=partuuid_root_device_fstab_line,
     )
 
-    write_line_to_file(
+    ensure_line_in_config_file(
         path=Path("/etc/default/grub"),
         # line='GRUB_CMDLINE_LINUX="net.ifnames=0 rootflags=noatime intel_iommu=off"'
-        line='GRUB_CMDLINE_LINUX="net.ifnames=0 rootflags=noatime earlyprintk=vga"'
-        + "\n",
-        unique=True,
+        line='GRUB_CMDLINE_LINUX="net.ifnames=0 rootflags=noatime earlyprintk=vga"',
     )
 
     hs.Command("ln")("-sf", "/proc/self/mounts", "/etc/mtab")
