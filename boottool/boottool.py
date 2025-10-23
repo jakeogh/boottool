@@ -1,27 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf8 -*-
 
-# pylint: disable=useless-suppression             # [I0021]
-# pylint: disable=missing-docstring               # [C0111] docstrings are always outdated and wrong
-# pylint: disable=missing-param-doc               # [W9015]
-# pylint: disable=missing-module-docstring        # [C0114]
-# pylint: disable=fixme                           # [W0511] todo encouraged
-# pylint: disable=line-too-long                   # [C0301]
-# pylint: disable=too-many-instance-attributes    # [R0902]
-# pylint: disable=too-many-lines                  # [C0302] too many lines in module
-# pylint: disable=invalid-name                    # [C0103] single letter var names, name too descriptive(!)
-# pylint: disable=too-many-return-statements      # [R0911]
-# pylint: disable=too-many-branches               # [R0912]
-# pylint: disable=too-many-statements             # [R0915]
-# pylint: disable=too-many-arguments              # [R0913]
-# pylint: disable=too-many-nested-blocks          # [R1702]
-# pylint: disable=too-many-locals                 # [R0914]
-# pylint: disable=too-many-public-methods         # [R0904]
-# pylint: disable=too-few-public-methods          # [R0903]
-# pylint: disable=no-member                       # [E1101] no member for base
-# pylint: disable=attribute-defined-outside-init  # [W0201]
-# pylint: disable=too-many-boolean-expressions    # [R0916] in if statement
-
 from __future__ import annotations
 
 import os
@@ -33,7 +12,7 @@ from signal import SIGPIPE
 from signal import signal
 
 import click
-import sh
+import hs
 from asserttool import ic
 from asserttool import icp
 from asserttool import root_user
@@ -68,7 +47,12 @@ def generate_grub_config(path: Path, replace: bool) -> None:
         if path.exists():
             raise FileExistsError(path)
 
-    sh.grub_mkconfig("-o", path.as_posix(), _out=sys.stdout, _err=sys.stderr)
+    hs.Command("grub-mkconfig")(
+        "-o",
+        path.as_posix(),
+        _out=sys.stdout,
+        _err=sys.stderr,
+    )
 
 
 def install_grub(
@@ -83,7 +67,7 @@ def install_grub(
             icp("/boot/efi not mounted. Exiting.")
             sys.exit(1)
 
-    sh.env_update()
+    hs.Command("env-update")()
     # set +u # disable nounset        # line 22 has an unbound variable: user_id /etc/profile.d/java-config-2.sh
     # source /etc/profile || exit 1
 
@@ -110,10 +94,10 @@ def install_grub(
     from devicetool import get_root_device
 
     root_partition = get_root_device()
-    # root_partition = Path(sh.grub_probe("--target=device", "/").strip())
+    # root_partition = Path(hs.Command("grub-probe")("--target=device", "/").strip())
     icp(root_partition)
     assert root_partition.as_posix().startswith("/dev/")
-    # partition_uuid_command = sh.Command('/home/cfg/linux/hardware/disk/blkid/PARTUUID')
+    # partition_uuid_command = hs.Command('/home/cfg/linux/hardware/disk/blkid/PARTUUID')
     # partuuid = partition_uuid_command(root_partition, _err=sys.stderr, _out=sys.stdout)
     partuuid = get_partuuid_for_partition(
         root_partition,
@@ -128,7 +112,7 @@ def install_grub(
 
     partuuid_root_device = get_partuuid_for_partition(partition=root_partition)
 
-    # partuuid_root_device_command = sh.Command(
+    # partuuid_root_device_command = hs.Command(
     #    "/home/cfg/linux/disk/blkid/PARTUUID_root_device"
     # )
     # partuuid_root_device = partuuid_root_device_command().strip()
@@ -157,10 +141,10 @@ def install_grub(
         unique=True,
     )
 
-    sh.ln("-sf", "/proc/self/mounts", "/etc/mtab")
+    hs.Command("ln")("-sf", "/proc/self/mounts", "/etc/mtab")
 
     if not skip_uefi:
-        _grub_command = sh.grub_install.bake(
+        _grub_command = hs.Command("grub-install").bake(
             "--compress=no",
             "--core-compress=none",
             "--target=x86_64-efi",
@@ -178,7 +162,7 @@ def install_grub(
             _err=sys.stderr,
         )
 
-    _grub_command = sh.grub_install.bake(
+    _grub_command = hs.Command("grub-install").bake(
         "--compress=no",
         "--core-compress=none",
         "--target=i386-pc",
@@ -192,7 +176,7 @@ def install_grub(
         # basically never boots because it's so slow
         # _grub_command = _grub_command.bake("--debug-image=all")
         # # disabled: relocator,scripting,lexer
-        _grub_command = _grub_command.bake(
+        _grub_command.bake(
             "--debug-image=acpi,affs,ahci,appleload,arcdisk,archelp,ata,atkeyb,biosdisk,bsd,btrfs,cache,cbfs,chain,crypt,cryptodisk,datetime,devalias,disk,diskfilter,dl,dns,drivemap,efi,efidisk,efiemu,ehci,elf,exfat,expand,fat,fb,fdt,fixvideo,font,fs,geli,gpt,hostdisk,init,jpeg,keystatus,linux,loader,luks,memdisk,mm,mmap,modules,multiboot_loader,nativedisk,net,ohci,partition,pata,play,reiserfs_tree,scsi,serial,smbios,syslinux,tftp,tga,ubootdisk,uhci,usb,usb_keyboard,usbms,video,xen,xen_loader,xfs,xnu,zfs"
         )
 
@@ -383,7 +367,7 @@ def write_boot_partition(
     start = "100MiB"
     end = "400MiB"
 
-    sh.parted(
+    hs.Command("parted")(
         "-a",
         "optimal",
         str(device),
@@ -396,8 +380,15 @@ def write_boot_partition(
         # _out=sys.stdout,
         # _err=sys.stderr,
     )
-    sh.parted(device, "--script", "--", "name", str(partition_number), "bootfs")
-    mkfs_command = sh.Command("mkfs.ext4")
+    hs.Command("parted")(
+        device,
+        "--script",
+        "--",
+        "name",
+        str(partition_number),
+        "bootfs",
+    )
+    mkfs_command = hs.Command("mkfs.ext4")
     mkfs_command(partition, _out=sys.stdout, _err=sys.stderr)
 
 
@@ -431,7 +422,7 @@ def make_hybrid_mbr(
     ) as _hybrid_mbr_script_path:
         icp(_hybrid_mbr_script_path)
 
-        make_hybrid_mbr_command = sh.Command(_hybrid_mbr_script_path)
+        make_hybrid_mbr_command = hs.Command(_hybrid_mbr_script_path)
         make_hybrid_mbr_command(
             _hybrid_mbr_script_path.parent / Path("gpart_make_hybrid_mbr.exp"),
             boot_device,
@@ -544,7 +535,7 @@ def create_boot_device_for_existing_root(
         partition_number=3,
     )
     assert not path_is_mounted(mount_path_boot)
-    sh.mount(
+    hs.Command("mount")(
         boot_partition_path,
         str(mount_path_boot),
         _out=sys.stdout,
@@ -559,8 +550,11 @@ def create_boot_device_for_existing_root(
         partition_number=2,
     )
     assert not path_is_mounted(mount_path_boot_efi)
-    sh.mount(
-        efi_partition_path, str(mount_path_boot_efi), _out=sys.stdout, _err=sys.stderr
+    hs.Command("mount")(
+        efi_partition_path,
+        str(mount_path_boot_efi),
+        _out=sys.stdout,
+        _err=sys.stderr,
     )
     assert path_is_mounted(mount_path_boot_efi)
 
