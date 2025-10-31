@@ -10,7 +10,7 @@ backend-path = [
 
 [project]
 name = "boottool"
-version = "1!0.0.1761897875"
+version = "1!0.0.1761898285"
 description = "Manages boot configuration"
 authors = [
     { name = "Justin Keogh", email = "github.com@v6y.net" },
@@ -35,7 +35,7 @@ boottool = [
 ]
 
 [tool.pep508-url-version-backend]
-dependencies-indexed = ["asserttool>=1!0.0.1761250315", "click-auto-help>=0.0.1761041641", "clicktool>=1!0.0.1761810015", "compile-kernel>=1!0.0.1761894818", "eprint>=1!0.0.1761259337", "globalverbose>=0.0.1761031290", "pathtool>=1!0.0.1761639272", "timestamptool>=1!0.0.1761897866", "warntool>=0.0.1760910085", "filetool>=0.0.1760910191"]
+dependencies-indexed = ["asserttool>=1!0.0.1761250315", "click-auto-help>=0.0.1761041641", "clicktool>=1!0.0.1761810015", "compile-kernel>=1!0.0.1761894818", "eprint>=1!0.0.1761259337", "globalverbose>=0.0.1761031290", "pathtool>=1!0.0.1761639272", "timestamptool>=1!0.0.1761898276", "warntool>=0.0.1760910085", "filetool>=0.0.1760910191"]
 dependencies-git = [
     "asserttool @ git+https://git@github.com/jakeogh/asserttool",
     "click-auto-help @ git+https://git@github.com/jakeogh/click-auto-help",
