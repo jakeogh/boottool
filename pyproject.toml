@@ -10,7 +10,7 @@ backend-path = [
 
 [project]
 name = "boottool"
-version = "1!0.0.1762043632"
+version = "1!0.0.1762043645"
 description = "Manages boot configuration"
 authors = [
     { name = "Justin Keogh", email = "github.com@v6y.net" },
