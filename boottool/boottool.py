@@ -182,8 +182,11 @@ def create_boot_device(
 
     if partition_table == "gpt":
         ctx.invoke(
+            # ctx.invoke bypasses click's required check and substitutes the
+            # option default, so source must be named here or it arrives as None
             destroy_block_device_head_and_tail,
             device=device,
+            source="zero",
             force=force,
             no_backup=False,
             verbose=True,
