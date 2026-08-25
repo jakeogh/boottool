@@ -16,7 +16,7 @@ from asserttool import icp
 from click_auto_help import AHGroup
 from clicktool import click_add_options
 from clicktool import click_global_options
-from clicktool import tvicgvd
+from clicktool import tvic
 from compile_kernel.compile_kernel import compile_and_install_kernel
 from compile_kernel.compile_kernel import install_compiled_kernel
 from devicelabeltool import write as write_device_label
@@ -30,7 +30,6 @@ from devicetool.cli import write_efi_partition
 from devicetool.cli import write_grub_bios_partition
 from eprint import eprint
 from filetool import ensure_line_in_config_file
-from globalverbose import gvd
 from mounttool import block_special_path_is_mounted
 from mounttool import path_is_mounted
 from portagetool import install_packages
@@ -230,12 +229,11 @@ def cli(
     dict_output: bool,
     verbose: bool = False,
 ) -> None:
-    tty, verbose = tvicgvd(
+    tty, verbose = tvic(
         ctx=ctx,
         verbose=verbose,
         verbose_inf=verbose_inf,
         ic=ic,
-        gvd=gvd,
     )
 
 
@@ -264,12 +262,11 @@ def write_boot_partition(
     dict_output: bool,
     verbose: bool = False,
 ) -> None:
-    tty, verbose = tvicgvd(
+    tty, verbose = tvic(
         ctx=ctx,
         verbose=verbose,
         verbose_inf=verbose_inf,
         ic=ic,
-        gvd=gvd,
     )
     ic("creating boot partition (for grub config, stage2, vmlinuz) on:", device)
     assert device_is_not_a_partition(device=device)
@@ -331,12 +328,11 @@ def make_hybrid_mbr(
     dict_output: bool,
     verbose: bool = False,
 ) -> None:
-    tty, verbose = tvicgvd(
+    tty, verbose = tvic(
         ctx=ctx,
         verbose=verbose,
         verbose_inf=verbose_inf,
         ic=ic,
-        gvd=gvd,
     )
     am_root()
 
@@ -399,12 +395,11 @@ def create_boot_device_for_existing_root(
     skip_uefi: bool,
     verbose: bool = False,
 ) -> None:
-    tty, verbose = tvicgvd(
+    tty, verbose = tvic(
         ctx=ctx,
         verbose=verbose,
         verbose_inf=verbose_inf,
         ic=ic,
-        gvd=gvd,
     )
     if configure_kernel:
         _compile_kernel = True
@@ -528,12 +523,11 @@ def _install_grub(
     dict_output: bool,
     verbose: bool = False,
 ) -> None:
-    tty, verbose = tvicgvd(
+    tty, verbose = tvic(
         ctx=ctx,
         verbose=verbose,
         verbose_inf=verbose_inf,
         ic=ic,
-        gvd=gvd,
     )
 
     install_grub(
@@ -566,12 +560,11 @@ def _regenerate_grub_config(
     dict_output: bool,
     verbose: bool = False,
 ) -> None:
-    tty, verbose = tvicgvd(
+    tty, verbose = tvic(
         ctx=ctx,
         verbose=verbose,
         verbose_inf=verbose_inf,
         ic=ic,
-        gvd=gvd,
     )
 
     generate_grub_config(path=path, replace=True)
