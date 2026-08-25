@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "boottool"
-version = "1!0.0.1787634100"
+version = "1!0.0.1787634111"
 description = "Manages boot configuration"
 authors = [
     { name = "Justin Keogh", email = "github.com@v6y.net" },
@@ -17,7 +17,7 @@ dependencies = [
     "clicktool @ git+https://github.com/jakeogh/clicktool@4bc98af7590652693aef664af7485acde40688c2",
     "compile-kernel @ git+https://github.com/jakeogh/compile-kernel@d04e8017fca376a81f0d3a508dbc634318728786",
     "devicelabeltool @ git+https://github.com/jakeogh/devicelabeltool@b9181d212a788a3f38ca8df943b1e47383ec77c6",
-    "devicetool @ git+https://github.com/jakeogh/devicetool@32d6d1fd888c123adff4ffd6f6186448cadc597b",
+    "devicetool @ git+https://github.com/jakeogh/devicetool@d090c813cb524e3b565c759067b1d4af0536670d",
     "eprint @ git+https://github.com/jakeogh/eprint@6ee1deca0c24b684eb5093247d6bd22e11f1b057",
     "filetool @ git+https://github.com/jakeogh/filetool@f972b0b7fe54b4055c2015dbbe26e53593b75359",
     "hs @ git+https://github.com/jakeogh/hs@b33c88f35cd24e773fea6ca4758193c9e815536d",
