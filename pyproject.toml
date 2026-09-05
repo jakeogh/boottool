@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "boottool"
-version = "1!0.0.1787634120"
+version = "1!0.0.1788594685"
 description = "Manages boot configuration"
 authors = [
     { name = "Justin Keogh", email = "github.com@v6y.net" },
@@ -15,7 +15,7 @@ dependencies = [
     "asserttool @ git+https://github.com/jakeogh/asserttool@4bd23a06c2161e488415acde89c29537e6720cc1",
     "click-auto-help @ git+https://github.com/jakeogh/click-auto-help@c53f57c78529a51ae9b03f579d7ee6f2d63ca03a",
     "clicktool @ git+https://github.com/jakeogh/clicktool@4bc98af7590652693aef664af7485acde40688c2",
-    "compile-kernel @ git+https://github.com/jakeogh/compile-kernel@d04e8017fca376a81f0d3a508dbc634318728786",
+    "compile-kernel @ git+https://github.com/jakeogh/compile-kernel@169c51534e58a614e6ecec254bcf6ab786b5cddc",
     "devicelabeltool @ git+https://github.com/jakeogh/devicelabeltool@b9181d212a788a3f38ca8df943b1e47383ec77c6",
     "devicetool @ git+https://github.com/jakeogh/devicetool@d090c813cb524e3b565c759067b1d4af0536670d",
     "eprint @ git+https://github.com/jakeogh/eprint@6ee1deca0c24b684eb5093247d6bd22e11f1b057",
@@ -23,7 +23,7 @@ dependencies = [
     "hs @ git+https://github.com/jakeogh/hs@b33c88f35cd24e773fea6ca4758193c9e815536d",
     "mounttool @ git+https://github.com/jakeogh/mounttool@1dc451c21a89a45ffb69161a6ed7432c8192d9a6",
     "portagetool @ git+https://github.com/jakeogh/portagetool@b9aa9ee04976463fa1d01ce5a92cbc70e1081ba3",
-    "timestamptool @ git+https://github.com/jakeogh/timestamptool@2d9868ec701af7666827ce3f6866198f80f14b2a",
+    "timestamptool @ git+https://github.com/jakeogh/timestamptool@9812907317982046073e96dc2e909faaa491fe4c",
     "warntool @ git+https://github.com/jakeogh/warntool@c61bf0caba8dbbcec97662734f45b77bb59a5c95",
 ]
 requires-python = ">=3.11"
