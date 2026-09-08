@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "boottool"
-version = "1!0.0.1788850286"
+version = "1!0.0.1788850621"
 description = "Manages boot configuration"
 authors = [
     { name = "Justin Keogh", email = "github.com@v6y.net" },
@@ -13,11 +13,11 @@ license = "ISC"
 dependencies = [
     "click",
     "asserttool @ git+https://github.com/jakeogh/asserttool@4bd23a06c2161e488415acde89c29537e6720cc1",
-    "click-auto-help @ git+https://github.com/jakeogh/click-auto-help@7bc2bfd39c7fc11eba09f70861d5121900d1243a",
+    "click-auto-help @ git+https://github.com/jakeogh/click-auto-help@0308bf2e30095ce9c87a083e1f013731827e60aa",
     "clicktool @ git+https://github.com/jakeogh/clicktool@4bc98af7590652693aef664af7485acde40688c2",
-    "compile-kernel @ git+https://github.com/jakeogh/compile-kernel@cbe750ffcba75f3cc0ec33dfe5f32e91ba1b5e00",
-    "devicelabeltool @ git+https://github.com/jakeogh/devicelabeltool@7775c3ca7ce4384466a49c92a55c056c10b8b8fc",
-    "devicetool @ git+https://github.com/jakeogh/devicetool@94414f0316b70f024e9cf2f5c19095210d92b4c5",
+    "compile-kernel @ git+https://github.com/jakeogh/compile-kernel@bea9c132605ec563f8bc8d356b02043be938ac64",
+    "devicelabeltool @ git+https://github.com/jakeogh/devicelabeltool@f8e0485c1f12e2e3e5cfcd63e21d491378df0258",
+    "devicetool @ git+https://github.com/jakeogh/devicetool@9aa2e3e84b20dceabf4dfbbd3f6c906cd57f33d6",
     "eprint @ git+https://github.com/jakeogh/eprint@6ee1deca0c24b684eb5093247d6bd22e11f1b057",
     "filetool @ git+https://github.com/jakeogh/filetool@f972b0b7fe54b4055c2015dbbe26e53593b75359",
     "hs @ git+https://github.com/jakeogh/hs@b33c88f35cd24e773fea6ca4758193c9e815536d",
